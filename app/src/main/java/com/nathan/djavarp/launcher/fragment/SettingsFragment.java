@@ -57,28 +57,17 @@ public class SettingsFragment extends Fragment {
 
         // Account
         TextInputEditText etNick = view.findViewById(R.id.et_nickname);
-        TextInputEditText etPass = view.findViewById(R.id.et_password);
         etNick.setText(SettingsIO.getString(ini, "client", "name", ""));
-        etPass.setText(SettingsIO.getString(ini, "client", "password", ""));
         etNick.addTextChangedListener(stringWriter("client", "name"));
-        etPass.addTextChangedListener(stringWriter("client", "password"));
+        bindSwitch(view, R.id.row_auto_aim, "Auto Aim", R.drawable.ic_launcher_play, "client", "autoaim", false);
 
         // Display
-        bindSwitch(view, R.id.row_first_person, "First-person view", R.drawable.ic_launcher_play, "gui", "firstperson", true);
         bindSwitch(view, R.id.row_show_fps, "Show FPS counter", R.drawable.ic_signal_24, "gui", "fps", true);
         bindSlider(view, R.id.slider_fps, R.id.lbl_fps_limit, "gui", "FPSLimit", 60);
-        bindSwitch(view, R.id.row_cutout, "Use cutout area", R.drawable.ic_story_stroke, "gui", "cutout", false);
-        bindSwitch(view, R.id.row_skybox, "Custom SkyBox", R.drawable.ic_globe_24, "gui", "skybox", false);
-        bindSwitch(view, R.id.row_snow, "Snow effect", R.drawable.story_fg, "gui", "snow", false);
-        bindSwitch(view, R.id.row_custom_hud, "Custom HUD", R.drawable.ic_mainmenu, "gui", "hud", false);
-        bindSwitch(view, R.id.row_radar_rect, "Round radar", R.drawable.ic_star, "gui", "radarrect", false);
 
         // Chat & UI
-        bindSwitch(view, R.id.row_hp_armour, "HP / Armour as text", R.drawable.ic_hud_hp, "gui", "hparmourtext", false);
-        bindSwitch(view, R.id.row_pc_money, "PC-style money", R.drawable.hud_ruble, "gui", "pcmoney", false);
         bindSlider(view, R.id.slider_font_size, R.id.lbl_font_size, "gui", "FontSize", 30);
         bindSwitch(view, R.id.row_android_keyboard, "Native Android keyboard", R.drawable.ic_buttoncolor, "gui", "androidkeyboard", false);
-        bindSwitch(view, R.id.row_outfit_guns, "Show outfit guns", R.drawable.hud_weapon_colt, "gui", "outfitguns", false);
 
         // Voice
         bindSwitch(view, R.id.row_voice, "Enable Voice Chat", R.drawable.ic_baseline_notifications_24, "gui", "VoiceChatEnable", true);

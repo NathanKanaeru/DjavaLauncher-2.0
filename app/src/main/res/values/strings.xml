@@ -80,7 +80,7 @@
     <string name="settings_cutout">Use cutout area</string>
     <string name="settings_skybox">Custom SkyBox</string>
     <string name="settings_snow">Snow effect</string>
-    <string name="settings_custom_hud">Custom HUD</string>
+    <string name="settings_auto_aim">Auto Aim</string>
     <string name="settings_round_radar">Round Radar</string>
     <string name="settings_hp_armour_text">HP / Armour as text</string>
     <string name="settings_pc_money">PC-style money</string>

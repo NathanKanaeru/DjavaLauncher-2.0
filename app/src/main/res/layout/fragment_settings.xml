@@ -62,27 +62,8 @@
                         android:maxLength="24" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_password"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:hint="@string/settings_password"
-                    app:endIconMode="password_toggle"
-                    app:startIconDrawable="@drawable/ic_lock_24"
-                    app:startIconTint="@color/md_primary"
-                    app:boxCornerRadiusTopStart="16dp"
-                    app:boxCornerRadiusTopEnd="16dp"
-                    app:boxCornerRadiusBottomStart="16dp"
-                    app:boxCornerRadiusBottomEnd="16dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_password"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textPassword" />
-                </com.google.android.material.textfield.TextInputLayout>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginTop="16dp" />
+                <include android:id="@+id/row_auto_aim" layout="@layout/item_setting_switch" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -104,8 +85,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <include android:id="@+id/row_first_person" layout="@layout/item_setting_switch" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
                 <include android:id="@+id/row_show_fps" layout="@layout/item_setting_switch" />
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
                 
@@ -147,17 +126,6 @@
                         android:valueTo="120"
                         android:stepSize="5" />
                 </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
-                <include android:id="@+id/row_cutout" layout="@layout/item_setting_switch" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
-                <include android:id="@+id/row_skybox" layout="@layout/item_setting_switch" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
-                <include android:id="@+id/row_snow" layout="@layout/item_setting_switch" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
-                <include android:id="@+id/row_custom_hud" layout="@layout/item_setting_switch" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
-                <include android:id="@+id/row_radar_rect" layout="@layout/item_setting_switch" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -178,11 +146,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <include android:id="@+id/row_hp_armour" layout="@layout/item_setting_switch" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
-                <include android:id="@+id/row_pc_money" layout="@layout/item_setting_switch" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -225,8 +188,6 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
                 <include android:id="@+id/row_android_keyboard" layout="@layout/item_setting_switch" />
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
-                <include android:id="@+id/row_outfit_guns" layout="@layout/item_setting_switch" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
