@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SA-MP Mobile</string>
+    <string name="app_name">Djava Launcher</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
@@ -9,4 +9,91 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <!-- Launcher Material 3 strings -->
+    <string name="nav_home">Home</string>
+    <string name="nav_server">Server</string>
+    <string name="nav_download">Download</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="download_title">Data Downloader</string>
+    <string name="download_gpu_label">GPU Terdeteksi: %1$s</string>
+    <string name="download_status_ready">Siap mengunduh data game</string>
+    <string name="download_status_downloading">Mengunduh: %1$s</string>
+    <string name="download_status_paused">Unduhan dijeda</string>
+    <string name="download_status_extracting">Mengekstrak file...</string>
+    <string name="download_status_complete">Data game berhasil dipasang!</string>
+    <string name="download_action_start">START DOWNLOAD</string>
+    <string name="download_action_pause">PAUSE</string>
+    <string name="download_action_resume">RESUME</string>
+    <string name="download_action_retry">RETRY</string>
+    <string name="download_info_speed">Speed: %1$s</string>
+    <string name="download_info_eta">ETA: %1$s</string>
+    <string name="download_info_progress">%1$d%% (%2$s / %3$s)</string>
+    <string name="download_notification_title">Djava Launcher Downloader</string>
+    <string name="download_notification_desc">Mengunduh aset game...</string>
+
+    <string name="home_welcome_title">Selamat datang</string>
+    <string name="home_welcome_subtitle">SA:MP Mobile Client</string>
+    <string name="home_quick_connect">QUICK CONNECT</string>
+    <string name="home_featured_label">Featured Server</string>
+    <string name="home_player_label">Nickname</string>
+    <string name="home_default_nick">Player</string>
+    <string name="home_online_hint">Pilih server dari tab Server untuk melihat detail lengkap sebelum connect.</string>
+    <string name="home_server_health">Status server resmi</string>
+    <string name="home_modern_title">Launcher modern untuk kota Djava</string>
+
+    <string name="server_title">Server List</string>
+    <string name="server_join">Join</string>
+    <string name="server_join_now">JOIN NOW</string>
+    <string name="server_view_details">LIHAT DETAIL</string>
+    <string name="server_featured_chip">FEATURED</string>
+    <string name="featured_description_default">Server resmi Djava Launcher dengan gameplay role play yang imersif, ekonomi seimbang, dan komunitas aktif. Bergabung sekarang dan mulai petualananmu di kota dengan dunia yang hidup.</string>
+    <string name="server_add_title">Tambah Server</string>
+    <string name="server_add_hint">IP:PORT</string>
+    <string name="server_add_action">Tambah</string>
+    <string name="server_add_error_format">Format harus IP:PORT</string>
+    <string name="server_add_error_port">Port harus 1-65535</string>
+    <string name="server_add_error_duplicate">Server sudah ada di list</string>
+    <string name="server_delete">Hapus</string>
+    <string name="server_detail_title">Detail Server</string>
+    <string name="server_detail_connect">Connect</string>
+    <string name="server_detail_nickname">Nickname</string>
+    <string name="server_detail_password">Password server</string>
+    <string name="server_detail_password_required">Server ini membutuhkan password</string>
+    <string name="server_dialog_cancel">Batal</string>
+    <string name="server_status_passworded">Password aktif</string>
+    <string name="server_status_open">Tanpa password</string>
+
+    <string name="settings_section_account">Account</string>
+    <string name="settings_section_display">Display</string>
+    <string name="settings_section_chat">Chat &amp; UI</string>
+    <string name="settings_section_voice">Voice Chat</string>
+    <string name="settings_section_advanced">Advanced</string>
+    <string name="settings_section_about">About</string>
+
+    <string name="settings_nickname">Nickname</string>
+    <string name="settings_password">Password (opsional)</string>
+    <string name="settings_first_person">First-person view</string>
+    <string name="settings_show_fps">Show FPS counter</string>
+    <string name="settings_fps_limit">FPS Limit</string>
+    <string name="settings_cutout">Use cutout area</string>
+    <string name="settings_skybox">Custom SkyBox</string>
+    <string name="settings_snow">Snow effect</string>
+    <string name="settings_custom_hud">Custom HUD</string>
+    <string name="settings_round_radar">Round Radar</string>
+    <string name="settings_hp_armour_text">HP / Armour as text</string>
+    <string name="settings_pc_money">PC-style money</string>
+    <string name="settings_font_size">Font size</string>
+    <string name="settings_android_keyboard">Native Android keyboard</string>
+    <string name="settings_outfit_guns">Show outfit guns</string>
+    <string name="settings_voice_chat">Enable Voice Chat</string>
+    <string name="settings_debug">Debug mode</string>
+    <string name="settings_online">Online mode</string>
+
+    <string name="about_version">Djava Launcher 1.0</string>
+    <string name="about_subline">SA:MP 0.3.7 client</string>
+
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
 </resources>

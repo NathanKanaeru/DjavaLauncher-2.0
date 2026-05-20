@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.rstarx.hexrays"
     android:installLocation="auto">
 
     <uses-permission android:name="INSTALL_PACKAGES" />
@@ -41,6 +40,7 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <application
+        android:name=".launcher.other.DjavaApplication"
         android:gwpAsanMode="always"
         android:requestLegacyExternalStorage="true"
         android:banner="@mipmap/ic_launcher"
@@ -52,7 +52,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:theme="@style/Theme.DjavaLauncher"
         android:usesCleartextTraffic="true"
         android:windowSoftInputMode="adjustNothing">
 
@@ -67,7 +67,7 @@
         </provider>
 
         <activity
-            android:name="com.rstarx.hexrays.game.SAMP"
+            android:name="com.nathan.djavarp.game.SAMP"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
@@ -76,18 +76,17 @@
             android:exported="true" />
 
         <activity
-            android:name=".launcher.MainActivity"
+            android:name="com.nathan.djavarp.launcher.activity.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:windowSoftInputMode="adjustNothing">
-        </activity>
+            android:theme="@style/Theme.DjavaLauncher"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
 
         <activity
-            android:name=".launcher.SplashActivity"
+            android:name="com.nathan.djavarp.launcher.activity.SplashScreenActivity"
             android:screenOrientation="portrait"
-            android:exported="true"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
-
+            android:theme="@style/Theme.DjavaLauncher"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -95,20 +94,17 @@
         </activity>
 
         <activity
-            android:name=".launcher.UpdateActivity"
+            android:name="com.nathan.djavarp.launcher.activity.UpdateActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        </activity>
-
-        <service android:name=".launcher.UpdateService" android:enabled="true" android:exported="false"/>
+            android:theme="@style/Theme.DjavaLauncher"
+            android:exported="false" />
 
         <service
-            android:name="com.rstarx.hexrays.launcher.util.FirebaseMessageReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+            android:name="com.nathan.djavarp.launcher.service.DownloadService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
     </application>
 
 </manifest>

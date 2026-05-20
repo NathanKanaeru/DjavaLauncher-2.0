@@ -18,8 +18,9 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://jitpack.io")
-        maven(url = "https://mint.splunk.com/gradle/")
+        maven(url = "https://maven.aliyun.com/repository/jcenter")
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
+        jcenter()
     }
 }
 

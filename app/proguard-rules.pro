@@ -5,7 +5,7 @@
 
 -keep class com.wardrumstudios.utils.* { *; }
 
--keep class com.rstarx.hexrays.game.* { *; }
+-keep class com.nathan.djavarp.game.* { *; }
 
 -dontwarn javax.servlet.**
 -dontwarn org.conscrypt.**

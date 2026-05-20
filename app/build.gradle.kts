@@ -7,24 +7,24 @@ plugins {
 android {
     signingConfigs {
         getByName("debug") {
-            storeFile = file("D:\\gtareversed\\keystore_playmarket2.jks")
+            storeFile = file("../keystore_playmarket2.jks")
             storePassword = "hayk2010"
             keyPassword = "hayk2010"
             keyAlias = "key0"
         }
         create("release") {
-            storeFile = file("D:\\gtareversed\\keystore_playmarket2.jks")
+            storeFile = file("../keystore_playmarket2.jks")
             keyAlias = "key0"
             storePassword = "hayk2010"
             keyPassword = "hayk2010"
         }
     }
-    namespace = "com.rstarx.hexrays"
+    namespace = "com.nathan.djavarp"
     //noinspection GradleDependency
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.rstarx.hexrays"
+        applicationId = "com.nathan.djavarp"
         minSdk = 26
         targetSdk = 36
         versionCode = 130
@@ -134,9 +134,17 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
+    implementation(libs.recyclerview)
+    implementation(libs.viewpager2)
+    implementation(libs.fragment)
+    implementation(libs.swiperefreshlayout)
 
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+
+    implementation(libs.lifecycle.runtime)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.process)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
@@ -153,10 +161,15 @@ dependencies {
 
     implementation(libs.ini4j)
     implementation(libs.glide)
-    implementation(libs.lifecycle.process)
     implementation(libs.paranoid)
     implementation(libs.shadowhook)
+
+    implementation("com.github.smarteist:autoimageslider:1.4.0")
+    implementation("com.github.hzy3774:AndroidP7zip:v1.7.2")
+    implementation("com.hzy:un7zip:+")
+    implementation("com.squareup.retrofit2:converter-gson:2.1.0")
 }
+
 
 afterEvaluate {
     android.applicationVariants.all {
