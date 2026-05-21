@@ -1681,7 +1681,7 @@ void InjectHooks()
     CCustomBuildingDNPipeline::InjectHooks();
     //CWidgetRadar::InjectHooks();
 
-    //CRealTimeShadowManager::InjectHooks();
+    CRealTimeShadowManager::InjectHooks();
     COcclusion::InjectHooks();
 }
 

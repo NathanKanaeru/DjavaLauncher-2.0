@@ -166,7 +166,7 @@ dependencies {
 
     implementation("com.github.smarteist:autoimageslider:1.4.0")
     implementation("com.github.hzy3774:AndroidP7zip:v1.7.2")
-    implementation("com.hzy:un7zip:+")
+    implementation("com.hzy:un7zip:1.7.0")
     implementation("com.squareup.retrofit2:converter-gson:2.1.0")
 }
 
