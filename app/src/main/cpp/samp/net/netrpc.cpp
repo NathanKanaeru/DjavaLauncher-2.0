@@ -186,7 +186,7 @@ void DialogBox(RPCParameters *rpcParams)
 	int iBitLength = rpcParams->numberOfBitsOfData;
 	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
 
-	int16_t wDialogID;
+	uint16_t wDialogID;
 	uint8_t byteDialogStyle;
 	uint8_t byteLength;
 	char szTitle[256 + 1];
@@ -219,13 +219,13 @@ void DialogBox(RPCParameters *rpcParams)
 	Log::addParameter("szButton2", szButton2);
 	Log::addParameter("szMessage", szMessage);
 	
-	if (wDialogID == 65535 || wDialogID < 0) //Fix Blank Dialog
+	if (wDialogID == 0xFFFF) //Fix Blank Dialog (65535 = invalid dialog)
 	{
 		pNetGame->SendDialogResponse(wDialogID, 1, -1, " ");
 		return;
 	}
 
-	DialogStyle style;
+	DialogStyle style = DialogStyle::MSGBOX;
 	switch (byteDialogStyle)
 	{
 	case 0:
@@ -245,6 +245,9 @@ void DialogBox(RPCParameters *rpcParams)
 		break;
 	case 5:
 		style = DialogStyle::TABLIST_HEADERS;
+		break;
+	default:
+		style = DialogStyle::MSGBOX;
 		break;
 	}
 

@@ -207,11 +207,11 @@ public class DialogManager {
 
         try {
             byte[] Str2 = str.getBytes("windows-874");
-
-            Hide();
             sendDialogResponse(i, DialogManager.this.mCurrentDialogId, i2, Str2);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+        } finally {
+            Hide();
         }
     }
 
@@ -244,7 +244,7 @@ public class DialogManager {
         setDialogStyle(this.mDialogStyle);
         this.mDialogCaption.setText(Util.getColoredString(this.mCaption));
         int i = this.mDialogStyle;
-        if (i == 0 || i == 1 || i == 3) {
+        if (i == 0 || i == 1 || i == 3 || i < 0 || i > 5) {
             this.mDialogText.setText(Util.getColoredString(this.mText));
             return;
         }
@@ -407,6 +407,12 @@ public class DialogManager {
             this.mDialogInputLayout.setVisibility(View.GONE);
             this.mDialogListLayout.setVisibility(View.VISIBLE);
             this.mDialogTabListRow.setVisibility(View.VISIBLE);
+        }
+        else {
+            this.mDialogTextLayout.setVisibility(View.GONE);
+            this.mDialogInputLayout.setVisibility(View.GONE);
+            this.mDialogListLayout.setVisibility(View.GONE);
+            this.mDialogTabListRow.setVisibility(View.GONE);
         }
     }
 
