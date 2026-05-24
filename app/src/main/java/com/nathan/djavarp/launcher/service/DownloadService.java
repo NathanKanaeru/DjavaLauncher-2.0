@@ -170,6 +170,7 @@ public class DownloadService extends Service {
 
                 File zipFile = new File(targetDir, item.fileName);
                 if (zipFile.exists()) {
+                    final Object lock = new Object();
                     final boolean[] extracted = {false};
                     final int[] totalFiles = {0};
                     final int[] currentFile = {0};
@@ -186,9 +187,10 @@ public class DownloadService extends Service {
                             currentFile[0]++;
                             if (totalFiles[0] > 0) {
                                 int percent = (currentFile[0] * 100) / totalFiles[0];
+                                broadcastExtractProgress(item.fileName, percent, name);
                                 if (percent != lastPercent) {
-                                    broadcastExtractProgress(item.fileName, percent, name);
                                     lastPercent = percent;
+                                    updateNotification("Mengekstrak: " + percent + "% (" + name + ")", percent);
                                 }
                             }
                         }
@@ -196,17 +198,19 @@ public class DownloadService extends Service {
                         @Override public void onSucceed() {
                             zipFile.delete();
                             downloadStore.setStatus(item.fileName, com.nathan.djavarp.launcher.util.DownloadStore.Status.EXTRACTED);
-                            extracted[0] = true;
+                            synchronized (lock) { extracted[0] = true; lock.notifyAll(); }
                         }
 
                         @Override
                         public void onError(int errorCode, String message) {
                             broadcastError(item.fileName, "Extraction error: " + message);
-                            extracted[0] = true; // Stop waiting
+                            synchronized (lock) { extracted[0] = true; lock.notifyAll(); }
                         }
                     });
-                    while(!extracted[0]) {
-                        try { Thread.sleep(100); } catch (InterruptedException e) {}
+                    synchronized (lock) {
+                        while(!extracted[0]) {
+                            try { lock.wait(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
+                        }
                     }
                 }
             }

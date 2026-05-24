@@ -116,17 +116,8 @@ public class DownloadFragment extends Fragment {
 
     private void setupList() {
         downloadItems = new ArrayList<>();
-        downloadItems.add(new DownloadModel("Base Game Data", 
-                "https://github.com/Nathan-Studios/DjavaLauncher/releases/download/gamedata/base.zip", "base.zip"));
-        
-        String gpuUrl = "";
-        String gpuFile = "";
-        switch (gpuType) {
-            case ADRENO: gpuUrl = "https://github.com/Nathan-Studios/DjavaLauncher/releases/download/gamedata/adreno.zip"; gpuFile = "adreno.zip"; break;
-            case MALI: gpuUrl = "https://github.com/Nathan-Studios/DjavaLauncher/releases/download/gamedata/mali.zip"; gpuFile = "mali.zip"; break;
-            default: gpuUrl = "https://github.com/Nathan-Studios/DjavaLauncher/releases/download/gamedata/powervr.zip"; gpuFile = "powervr.zip"; break;
-        }
-        downloadItems.add(new DownloadModel("GPU Textures (" + gpuType.name() + ")", gpuUrl, gpuFile));
+        downloadItems.add(new DownloadModel("Game Data",
+                "https://github.com/Nathan-Studios/DjavaLauncher/releases/download/datagame/datagame.zip", "datagame.zip"));
 
         adapter = new DownloadAdapter(downloadItems, downloadStore, item -> {
             Intent intent = new Intent(requireContext(), DownloadService.class);
@@ -135,7 +126,7 @@ public class DownloadFragment extends Fragment {
             intent.putExtra("file_name", item.fileName);
             intent.putExtra("label", item.title);
             requireContext().startService(intent);
-            
+
             item.isDownloading = true;
             item.status = "Starting...";
             adapter.notifyDataSetChanged();

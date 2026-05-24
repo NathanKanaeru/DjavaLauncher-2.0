@@ -35,10 +35,6 @@ public class DownloadStore {
     }
 
     public boolean isAllFinished() {
-        // This is a bit specific to the files we know
-        return getStatus("base.zip") == Status.EXTRACTED && 
-               (getStatus("adreno.zip") == Status.EXTRACTED || 
-                getStatus("mali.zip") == Status.EXTRACTED || 
-                getStatus("powervr.zip") == Status.EXTRACTED);
+        return getStatus("datagame.zip") == Status.EXTRACTED;
     }
 }
