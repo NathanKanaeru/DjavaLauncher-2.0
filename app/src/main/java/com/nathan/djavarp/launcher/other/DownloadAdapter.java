@@ -68,6 +68,12 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHo
             holder.btnDownload.setVisibility(View.GONE);
             holder.progressContainer.setVisibility(View.GONE);
             holder.tvStatus.setText("Finished");
+        } else if (status == DownloadStore.Status.DOWNLOADED && !item.isDownloading && !item.isExtracting) {
+            holder.ivDone.setVisibility(View.GONE);
+            holder.btnDownload.setVisibility(View.VISIBLE);
+            holder.btnDownload.setEnabled(true);
+            holder.progressContainer.setVisibility(View.GONE);
+            holder.tvStatus.setText("Ready to extract");
         } else {
             holder.ivDone.setVisibility(View.GONE);
             holder.btnDownload.setVisibility(View.VISIBLE);

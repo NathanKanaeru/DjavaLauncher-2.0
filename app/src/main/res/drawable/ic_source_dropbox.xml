@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#0061FF"
+        android:pathData="M24,4A20,20 0,1,0 24,44A20,20 0,1,0 24,4Z" />
+    <!-- Dropbox open box icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,18L20,14L24,17L18,21Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,17L28,14L34,18L28,21Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,24L20,28L24,25L18,21Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,24L28,28L24,25L30,21Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,28L24,31L28,28L24,25Z" />
+</vector>

@@ -35,6 +35,6 @@ public class DownloadStore {
     }
 
     public boolean isAllFinished() {
-        return getStatus("datagame.zip") == Status.EXTRACTED;
+        return getStatus("SAMP.zip") == Status.EXTRACTED;
     }
 }

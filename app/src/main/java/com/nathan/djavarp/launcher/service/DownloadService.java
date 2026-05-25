@@ -18,15 +18,19 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.downloader.Error;
 import com.downloader.OnDownloadListener;
 import com.downloader.PRDownloader;
-import com.hzy.lib7z.Z7Extractor;
 import com.nathan.djavarp.R;
 import com.nathan.djavarp.launcher.activity.MainActivity;
-import com.nathan.djavarp.launcher.other.UnZipCallback;
+import com.nathan.djavarp.launcher.util.DownloadStore;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class DownloadService extends Service {
 
@@ -51,7 +55,7 @@ public class DownloadService extends Service {
     private String currentSpeed = "0 KB/s";
     private String currentEta = "--";
 
-    private com.nathan.djavarp.launcher.util.DownloadStore downloadStore;
+    private DownloadStore downloadStore;
 
     public static class DownloadItem {
         public String url, fileName, label;
@@ -63,7 +67,7 @@ public class DownloadService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        downloadStore = new com.nathan.djavarp.launcher.util.DownloadStore(this);
+        downloadStore = new DownloadStore(this);
     }
 
     @Override
@@ -72,16 +76,22 @@ public class DownloadService extends Service {
             String url = intent.getStringExtra("url");
             String fileName = intent.getStringExtra("file_name");
             String label = intent.getStringExtra("label");
+            boolean skipDownload = intent.getBooleanExtra("skip_download", false);
 
             queue.clear();
             queue.add(new DownloadItem(url, fileName, label));
             currentIndex = 0;
             lastPercent = -1;
 
-            createNotificationChannel();
-            startForeground(NOTIFICATION_ID, buildNotification("Memulai unduhan...", 0));
-
-            startNext();
+            if (skipDownload) {
+                createNotificationChannel();
+                startForeground(NOTIFICATION_ID, buildNotification("Mengekstrak...", -1));
+                extractFiles();
+            } else {
+                createNotificationChannel();
+                startForeground(NOTIFICATION_ID, buildNotification("Memulai unduhan...", 0));
+                startNext();
+            }
         }
         return START_NOT_STICKY;
     }
@@ -93,7 +103,14 @@ public class DownloadService extends Service {
         }
 
         DownloadItem item = queue.get(currentIndex);
-        String path = getExternalFilesDir(null).getAbsolutePath();
+        File dir = getExternalFilesDir(null);
+        if (dir == null) {
+            broadcastError(item.fileName, "External storage not available");
+            stopForeground(true);
+            stopSelf();
+            return;
+        }
+        String path = dir.getAbsolutePath();
 
         lastTime = System.currentTimeMillis();
         lastBytes = 0;
@@ -117,7 +134,7 @@ public class DownloadService extends Service {
                 .start(new OnDownloadListener() {
                     @Override
                     public void onDownloadComplete() {
-                        downloadStore.setStatus(item.fileName, com.nathan.djavarp.launcher.util.DownloadStore.Status.DOWNLOADED);
+                        downloadStore.setStatus(item.fileName, DownloadStore.Status.DOWNLOADED);
                         currentIndex++;
                         startNext();
                     }
@@ -164,63 +181,91 @@ public class DownloadService extends Service {
     private void extractFiles() {
         new Thread(() -> {
             File targetDir = getExternalFilesDir(null);
+            if (targetDir == null) {
+                broadcastError("unknown", "External storage not available");
+                stopForeground(true);
+                stopSelf();
+                return;
+            }
+            boolean allSuccess = true;
+
             for (DownloadItem item : queue) {
                 broadcastStatus(ACTION_EXTRACTING, item.fileName);
                 updateNotification("Mengekstrak " + item.label + "...", -1);
 
                 File zipFile = new File(targetDir, item.fileName);
-                if (zipFile.exists()) {
-                    final Object lock = new Object();
-                    final boolean[] extracted = {false};
-                    final int[] totalFiles = {0};
-                    final int[] currentFile = {0};
+                if (!zipFile.exists()) {
+                    broadcastError(item.fileName, "File tidak ditemukan: " + item.fileName);
+                    allSuccess = false;
+                    continue;
+                }
+
+                try {
+                    int totalFiles = countZipEntries(zipFile);
+                    int currentFile = 0;
                     lastPercent = -1;
 
-                    Z7Extractor.extractFile(zipFile.getAbsolutePath(), targetDir.getAbsolutePath(), new UnZipCallback() {
-                        @Override
-                        public void onGetFileNum(int fileNum) {
-                            totalFiles[0] = fileNum;
-                        }
+                    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+                        ZipEntry entry;
+                        while ((entry = zis.getNextEntry()) != null) {
+                            String entryName = entry.getName();
+                            File outputFile = new File(targetDir, entryName);
 
-                        @Override
-                        public void onProgress(String name, long size) {
-                            currentFile[0]++;
-                            if (totalFiles[0] > 0) {
-                                int percent = (currentFile[0] * 100) / totalFiles[0];
-                                broadcastExtractProgress(item.fileName, percent, name);
+                            if (entry.isDirectory()) {
+                                outputFile.mkdirs();
+                            } else {
+                                outputFile.getParentFile().mkdirs();
+                                try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+                                    byte[] buffer = new byte[8192];
+                                    int len;
+                                    while ((len = zis.read(buffer)) != -1) {
+                                        fos.write(buffer, 0, len);
+                                    }
+                                }
+                            }
+                            zis.closeEntry();
+
+                            currentFile++;
+                            if (totalFiles > 0) {
+                                int percent = (currentFile * 100) / totalFiles;
+                                broadcastExtractProgress(item.fileName, percent, entryName);
                                 if (percent != lastPercent) {
                                     lastPercent = percent;
-                                    updateNotification("Mengekstrak: " + percent + "% (" + name + ")", percent);
+                                    updateNotification("Mengekstrak: " + percent + "% (" + entryName + ")", percent);
                                 }
                             }
                         }
-
-                        @Override public void onSucceed() {
-                            zipFile.delete();
-                            downloadStore.setStatus(item.fileName, com.nathan.djavarp.launcher.util.DownloadStore.Status.EXTRACTED);
-                            synchronized (lock) { extracted[0] = true; lock.notifyAll(); }
-                        }
-
-                        @Override
-                        public void onError(int errorCode, String message) {
-                            broadcastError(item.fileName, "Extraction error: " + message);
-                            synchronized (lock) { extracted[0] = true; lock.notifyAll(); }
-                        }
-                    });
-                    synchronized (lock) {
-                        while(!extracted[0]) {
-                            try { lock.wait(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
-                        }
                     }
+
+                    zipFile.delete();
+                    downloadStore.setStatus(item.fileName, DownloadStore.Status.EXTRACTED);
+                } catch (Exception e) {
+                    broadcastError(item.fileName, "Extraction error: " + e.getMessage());
+                    allSuccess = false;
                 }
             }
 
+            final boolean finalSuccess = allSuccess;
             new Handler(Looper.getMainLooper()).post(() -> {
-                broadcastStatus(ACTION_DOWNLOAD_COMPLETE, queue.get(0).fileName);
+                if (finalSuccess) {
+                    broadcastStatus(ACTION_DOWNLOAD_COMPLETE, queue.get(0).fileName);
+                }
                 stopForeground(true);
                 stopSelf();
             });
         }).start();
+    }
+
+    private int countZipEntries(File zipFile) {
+        int count = 0;
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+            while (zis.getNextEntry() != null) {
+                count++;
+                zis.closeEntry();
+            }
+        } catch (IOException ignored) {
+        }
+        return count;
     }
 
     private void broadcastProgress(String label, int percent, long current, long total) {
