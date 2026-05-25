@@ -1,22 +1,22 @@
-SIGSEGV | Fault address: 0x3f6c0000
+SIGSEGV | Fault address: 0x3d86f000
 
 ========== REGISTER STATES (64-Bit) ==========
 
-x0:  0xb40000773f5eaff8  x1:  0xb40000773f6bfffe  x2:  0x0000000000000004  x3:  0x0000000000000004
+x0:  0xb40000773d799ff8  x1:  0xb40000773d86effe  x2:  0x0000000000000004  x3:  0x0000000000000004
 
-x4:  0xb40000773f6c0002  x5:  0xb40000773f5eaffc  x6:  0x0000000000000000  x7:  0x00000000ffffff73
+x4:  0xb40000773d86f002  x5:  0xb40000773d799ffc  x6:  0x0000000000000000  x7:  0x00000000ffffff73
 
-x8:  0x0000000000000000  x9:  0x00000000ffff7c0e  x10: 0x00000000585a5178  x11: 0x0000000000000000
+x8:  0x0000000000000000  x9:  0x00000000ffff7c0e  x10: 0x000000001e72d1de  x11: 0x0000000000000000
 
 x12: 0x0000000000004000  x13: 0x0000007b7b1c4378  x14: 0x0000000000000000  x15: 0xcccccccccccccccd
 
-x16: 0x00000077598adf70  x17: 0x0000007b7b133a80  x18: 0x0000000000008363  x19: 0x000000000000001a
+x16: 0x00000077596e0f70  x17: 0x0000007b7b133a80  x18: 0x0000000000008363  x19: 0x000000000000001a
 
-x20: 0xb40000773f6bfffe  x21: 0xb40000773f5eaff8  x22: 0x0000000000000004  x23: 0xb40000773f6bffe6
+x20: 0xb40000773d86effe  x21: 0xb40000773d799ff8  x22: 0x0000000000000004  x23: 0xb40000773d86efe6
 
-x24: 0xb40000773f5eafe4  x25: 0xb40000773f5eb000  x26: 0x0000000000000006  x27: 0x0000000000000000
+x24: 0xb40000773d799fe4  x25: 0xb40000773d79a000  x26: 0x0000000000000006  x27: 0x0000000000000000
 
-x28: 0x00000000000000b0  FP:  0x0000007744e2a130  LR:  0x00000077592f20c8  SP:  0x0000007744e2a0e0
+x28: 0x00000000000000b0  FP:  0x000000775144c130  LR:  0x00000077591250c8  SP:  0x000000775144c0e0
 
 PC:  0x0000007b7b133ad4
 
@@ -24,13 +24,13 @@ PC:  0x0000007b7b133ad4
 
 Possible Offsets:
 
-  libGTASA.so (64-Bit) + 0x4220c4ad4 (PC)
+  libGTASA.so (64-Bit) + 0x422291ad4 (PC)
 
   libGTASA.so (64-Bit) + 0x2830c8 (LR)
 
-  libsamp.so  (64-Bit) + 0x424900ad4 (PC)
+  libsamp.so  (64-Bit) + 0x42570bad4 (PC)
 
-  libsamp.so  (64-Bit) + 0x2abf0c8 (LR)
+  libsamp.so  (64-Bit) + 0x36fd0c8 (LR)
 
 !!! CRASH OUTSIDE KNOWN 64-BIT RANGE !!!
 
@@ -40,45 +40,45 @@ Last rendered object: 0
 
  
 
-[adr: 0x0000007756a0d63c | samp: +0x1da63c | gta: +0xfffffffffd99e63c] _Z7handleriP7siginfoPv
+[adr: 0x0000007755c0263c | samp: +0x1da63c | gta: +0xfffffffffcd6063c] _Z7handleriP7siginfoPv
 
-[adr: 0x0000007b6824bf98 | samp: +0x411a18f98 | gta: +0x40f1dcf98] _ZN3art11SignalChain7HandlerEiP7siginfoPv
+[adr: 0x0000007b6824bf98 | samp: +0x412823f98 | gta: +0x40f3a9f98] _ZN3art11SignalChain7HandlerEiP7siginfoPv
 
-[adr: 0x0000007b9762b89c | samp: +0x440df889c | gta: +0x43e5bc89c] __kernel_rt_sigreturn
+[adr: 0x0000007b9762b89c | samp: +0x441c0389c | gta: +0x43e78989c] __kernel_rt_sigreturn
 
-[adr: 0x0000007b7b133ad4 | samp: +0x424900ad4 | gta: +0x4220c4ad4] (no symbol)
+[adr: 0x0000007b7b133ad4 | samp: +0x42570bad4 | gta: +0x422291ad4] (no symbol)
 
-[adr: 0x00000077592f20c8 | samp: +0x2abf0c8 | gta: +0x2830c8] _Z13RLEDecompressPhjPKhjj
+[adr: 0x00000077591250c8 | samp: +0x36fd0c8 | gta: +0x2830c8] _Z13RLEDecompressPhjPKhjj
 
-[adr: 0x00000077592f4954 | samp: +0x2ac1954 | gta: +0x285954] _ZN22TextureDatabaseRuntime15LoadFullTextureEj
+[adr: 0x0000007759127954 | samp: +0x36ff954 | gta: +0x285954] _ZN22TextureDatabaseRuntime15LoadFullTextureEj
 
-[adr: 0x00000077592f478c | samp: +0x2ac178c | gta: +0x28578c] _ZN22TextureDatabaseRuntime12GetRWTextureEi
+[adr: 0x000000775912778c | samp: +0x36ff78c | gta: +0x28578c] _ZN22TextureDatabaseRuntime12GetRWTextureEi
 
-[adr: 0x00000077592f5964 | samp: +0x2ac2964 | gta: +0x286964] _ZN22TextureDatabaseRuntime10GetTextureEPKc
+[adr: 0x0000007759128964 | samp: +0x3700964 | gta: +0x286964] _ZN22TextureDatabaseRuntime10GetTextureEPKc
 
-[adr: 0x00000077592e32e4 | samp: +0x2ab02e4 | gta: +0x2742e4] _Z13RwTextureReadPKcS0_
+[adr: 0x00000077591162e4 | samp: +0x36ee2e4 | gta: +0x2742e4] _Z13RwTextureReadPKcS0_
 
-[adr: 0x000000775975bd5c | samp: +0x2f28d5c | gta: +0x6ecd5c] _ZN9CSprite2d10SetTextureEPc
+[adr: 0x000000775958ed5c | samp: +0x3b66d5c | gta: +0x6ecd5c] _ZN9CSprite2d10SetTextureEPc
 
-[adr: 0x000000775958f164 | samp: +0x2d5c164 | gta: +0x520164] _ZN14CLoadingScreen12LoadSplashesEhh
+[adr: 0x00000077593c2164 | samp: +0x399a164 | gta: +0x520164] _ZN14CLoadingScreen12LoadSplashesEhh
 
-[adr: 0x000000775958f460 | samp: +0x2d5c460 | gta: +0x520460] _ZN14CLoadingScreen12RenderSplashEv
+[adr: 0x00000077593c2460 | samp: +0x399a460 | gta: +0x520460] _ZN14CLoadingScreen12RenderSplashEv
 
-[adr: 0x000000775958f3a8 | samp: +0x2d5c3a8 | gta: +0x5203a8] _ZN14CLoadingScreen15DisplayPCScreenEv
+[adr: 0x00000077593c23a8 | samp: +0x399a3a8 | gta: +0x5203a8] _ZN14CLoadingScreen15DisplayPCScreenEv
 
-[adr: 0x000000775958f7a4 | samp: +0x2d5c7a4 | gta: +0x5207a4] _ZN14CLoadingScreen16DoPCScreenChangeEjj
+[adr: 0x00000077593c27a4 | samp: +0x399a7a4 | gta: +0x5207a4] _ZN14CLoadingScreen16DoPCScreenChangeEjj
 
-[adr: 0x00000077597793e0 | samp: +0x2f463e0 | gta: +0x70a3e0] _Z11DoGameStatev
+[adr: 0x00000077595ac3e0 | samp: +0x3b843e0 | gta: +0x70a3e0] _Z11DoGameStatev
 
-[adr: 0x0000007759779ca0 | samp: +0x2f46ca0 | gta: +0x70aca0] _Z12MainGameFuncPv
+[adr: 0x00000077595acca0 | samp: +0x3b84ca0 | gta: +0x70aca0] _Z12MainGameFuncPv
 
-[adr: 0x0000007759390b60 | samp: +0x2b5db60 | gta: +0x321b60] _Z12ANDRunThreadPv
+[adr: 0x00000077591c3b60 | samp: +0x379bb60 | gta: +0x321b60] _Z12ANDRunThreadPv
 
-[adr: 0x00000077593a114c | samp: +0x2b6e14c | gta: +0x33214c] (no symbol)
+[adr: 0x00000077591d414c | samp: +0x37ac14c | gta: +0x33214c] (no symbol)
 
-[adr: 0x0000007b7b14c66c | samp: +0x42491966c | gta: +0x4220dd66c] (no symbol)
+[adr: 0x0000007b7b14c66c | samp: +0x42572466c | gta: +0x4222aa66c] (no symbol)
 
-[adr: 0x0000007b7b13da04 | samp: +0x42490aa04 | gta: +0x4220cea04] (no symbol)
+[adr: 0x0000007b7b13da04 | samp: +0x425715a04 | gta: +0x42229ba04] (no symbol)
 
 ------------ END BACKTRACE ------------
 
