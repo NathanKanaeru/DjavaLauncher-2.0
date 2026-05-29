@@ -106,3 +106,7 @@ CSettings::CSettings()
 	m_Settings.bCustomStorage = reader.GetBoolean("client", "custom_storage", false);
 	FLog("Settings loaded.");
 }
+
+CSettings::~CSettings()
+{
+}
