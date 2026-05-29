@@ -1447,99 +1447,72 @@ bool RwResourcesFreeResEntry_hook(void* entry)
     return result;
 }
 
-extern "C" int OS_FileRead(void* file, void* buf, int len);
-__attribute__((weak)) int OS_FileRead(void* file, void* buf, int len) { return 0; }
+#include <stdexcept>
 
-static int (*orig_OS_FileRead)(void*, void*, int) = nullptr;
+static uint32_t dwRLEDecompressSourceSize = 0;
 
-uint32_t dwRLEDecompressSourceSize = 0;
-
-// Hook
-int OS_FileRead_hook(void* a1, void* a2, int a3)
+size_t (*orig_OS_FileRead)(void* a1, void *buffer, size_t numBytes);
+size_t OS_FileRead_hook(void* a1, void *buffer, size_t numBytes)
 {
-    int ret = orig_OS_FileRead ? orig_OS_FileRead(a1, a2, a3) : 0;
+    dwRLEDecompressSourceSize = numBytes;
 
-    // Only capture size if reading exactly 4 bytes from the expected callers
-    if (a3 == 4)
-    {
-        uintptr_t caller = (uintptr_t)__builtin_return_address(0) - g_libGTASA;
-
-#ifdef VER_x32
-        if (caller == 0x1E91AC)
-#else
-        if (caller == 0x2858B8 || caller == 0x2858C0)
-#endif
-        {
-            dwRLEDecompressSourceSize = *(uint32_t*)a2;
-        }
-    }
-
-    return ret;
+    return orig_OS_FileRead(a1, buffer, numBytes);
 }
 
-// Original RLE function pointer
-void (*orig_RLEDecompress)(uint8_t* dest, size_t destSize, const uint8_t* src, size_t segSize, uint32_t escape) = nullptr;
-void RLEDecompress_hook(uint8_t* dest, size_t destSize, const uint8_t* src, size_t segSize, uint32_t escape)
-{
-    if (!dest || !src || destSize == 0 || segSize == 0 || !orig_RLEDecompress) return;
+char g_iLastBlock[123];
 
-    // Use original if source size is unknown to avoid regression
-    if (dwRLEDecompressSourceSize == 0)
-    {
-        orig_RLEDecompress(dest, destSize, src, segSize, escape);
+int *(*LoadFullTexture)(TextureDatabaseRuntime *thiz, unsigned int a2);
+int *LoadFullTexture_hook(TextureDatabaseRuntime *thiz, unsigned int a2)
+{
+	strcpy(g_iLastBlock, thiz->name);
+
+    return LoadFullTexture(thiz, a2);
+}
+
+void (*orig_RLEDecompress)(uint8_t* pDest, size_t uiDestSize, uint8_t const* pSrc, size_t uiSegSize, uint32_t uiEscape);
+void RLEDecompress_hook(uint8_t* pDest, size_t uiDestSize, const uint8_t* pSrc, size_t uiSegSize, uint32_t uiEscape) {
+
+    if (!pDest || !pSrc || uiDestSize == 0 || uiSegSize == 0 || !orig_RLEDecompress) {
         return;
     }
 
-    uint8_t* out = dest;
-    const uint8_t* in = src;
-    const uint8_t* in_end  = src + dwRLEDecompressSourceSize;
-    const uint8_t* out_end = dest + destSize;
+    const uint8_t* pTempSrc = pSrc;
+    const uint8_t* const pEndOfDest = pDest + uiDestSize;
+    const uint8_t* const pEndOfSrc = pSrc + dwRLEDecompressSourceSize; // Предполагается, что dwRLEDecompressSourceSize определено правильно
 
-    while (out < out_end && in < in_end)
-    {
-        if (*in == escape)
-        {
-            if (in + 2 > in_end) break;
-            uint8_t count = in[1];
-            if (count == 0) 
-            { 
-                if (out + segSize > out_end) break;
-                // Special case for literal escape if applicable, or just skip
-                in += 2; 
-                continue; 
-            }
-
-            if (in + 2 + segSize > in_end) break;
-
-            size_t bytes_to_copy = (size_t)count * segSize;
-            if (out + bytes_to_copy > out_end)
-            {
-                // Partial copy if remaining space is multiple of segSize
-                bytes_to_copy = ((size_t)(out_end - out) / segSize) * segSize;
-                count = bytes_to_copy / segSize;
-            }
-
-            if (count > 0)
-            {
-                const uint8_t* segment = in + 2;
-                for (uint8_t i = 0; i < count; ++i)
-                {
-                    memcpy(out, segment, segSize);
-                    out += segSize;
+    try {
+        while (pDest < pEndOfDest && pTempSrc < pEndOfSrc) {
+            if (*pTempSrc == uiEscape) {
+                if (pTempSrc + 1 >= pEndOfSrc || pTempSrc[1] == 0 || pTempSrc + 2 + uiSegSize > pEndOfSrc) {
+                    // Обработка ошибки, неверное значение ucCurSeg atau недостаточно данных в исходном буфере
+                    throw std::runtime_error("rled error 1");
                 }
-            }
-            in += 2 + segSize;
-        }
-        else
-        {
-            if (in + segSize > in_end || out + segSize > out_end) break;
-            memcpy(out, in, segSize);
-            out += segSize;
-            in += segSize;
-        }
-    }
 
-    dwRLEDecompressSourceSize = 0;
+                uint8_t ucCurSeg = pTempSrc[1];
+                while (ucCurSeg--) {
+                    if (pDest + uiSegSize > pEndOfDest) {
+                        // Обработка ошибки, недостаточно места в целевом буфере
+                        throw std::runtime_error("rled error 2");
+                    }
+                    memcpy(pDest, pTempSrc + 2, uiSegSize);
+                    pDest += uiSegSize;
+                }
+                pTempSrc += 2 + uiSegSize;
+            } else {
+                if (pDest + uiSegSize > pEndOfDest || pTempSrc + uiSegSize > pEndOfSrc) {
+                    // Обработка ошибки, недостаточно данных в исходном буфере atau недостаточно места в целевом буфере
+                    throw std::runtime_error("rled error 3");
+                }
+                memcpy(pDest, pTempSrc, uiSegSize);
+                pDest += uiSegSize;
+                pTempSrc += uiSegSize;
+            }
+        }
+
+        dwRLEDecompressSourceSize = 0;
+    } catch (const std::exception& e) {
+        FLog("%s", e.what());
+    }
 }
 
 void (*CGame_Process)();
@@ -1736,7 +1709,7 @@ void InstallSpecialHooks()
     CHook::RET("_ZN4CPed31RemoveWeaponWhenEnteringVehicleEi"); // CPed::RemoveWeaponWhenEnteringVehicle
 
     CHook::InstallPLT(g_libGTASA + (VER_x32 ? 0x6701D4 : 0x840708), &RLEDecompress_hook, &orig_RLEDecompress);
-
+    CHook::InlineHook("_ZN22TextureDatabaseRuntime15LoadFullTextureEj", &LoadFullTexture_hook, &LoadFullTexture);
     CHook::InlineHook("_Z11OS_FileReadPvS_i", &OS_FileRead_hook, &orig_OS_FileRead);
 
 	CHook::InlineHook("_Z32_rxOpenGLDefaultAllInOneRenderCBP10RwResEntryPvhj", &rxOpenGLDefaultAllInOneRenderCB_hook, &rxOpenGLDefaultAllInOneRenderCB);
