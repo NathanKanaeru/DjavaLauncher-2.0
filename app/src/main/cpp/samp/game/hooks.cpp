@@ -1135,6 +1135,7 @@ void CRadar_ClearBlip_hook(uint32_t a2)
 void ReadSettingFile();
 void ApplyFPSPatch();
 void (*NvUtilInit)();
+extern CSettings* pSettings;
 void NvUtilInit_hook()
 {
     FLog("NvUtilInit");
@@ -1144,6 +1145,19 @@ void NvUtilInit_hook()
     g_pszStorage = (char*)(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8)); // StorageRootBuffer
 
     ReadSettingFile();
+
+    if(pSettings->Get().bCustomStorage)
+    {
+        static const char* customPath = "/storage/emulated/0/Android/data/com.nathan/djavarp/files/";
+        FLog("Applying custom storage path: %s", customPath);
+
+        g_pszStorage = (char*)customPath;
+
+        // Primary Storage Pointer
+        CHook::Write(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8), &customPath);
+        // Secondary Storage Pointer
+        CHook::Write(g_libGTASA + (VER_x32 ? 0x6796A0 : 0x850D50), &customPath);
+    }
 
     ApplyFPSPatch();
 }

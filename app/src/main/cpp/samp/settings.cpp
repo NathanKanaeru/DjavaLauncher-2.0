@@ -103,5 +103,6 @@ CSettings::CSettings()
 	m_Settings.iRadarRect = reader.GetBoolean("gui", "radarrect", false);
 	m_Settings.iSkyBox = reader.GetBoolean("gui", "skybox", false);
 	m_Settings.iSnow = reader.GetBoolean("gui", "snow", false);
+	m_Settings.bCustomStorage = reader.GetBoolean("client", "custom_storage", false);
 	FLog("Settings loaded.");
 }

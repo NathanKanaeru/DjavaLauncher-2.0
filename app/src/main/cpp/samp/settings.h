@@ -54,6 +54,8 @@ struct stSettings
 	bool iSnow;
 	bool iFirstPerson;
 
+	bool bCustomStorage;
+
 	int iFPSCount;
 
 	bool iDialog;
