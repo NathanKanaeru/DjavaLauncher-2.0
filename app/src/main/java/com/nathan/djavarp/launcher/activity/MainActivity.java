@@ -22,7 +22,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.Toast;
+
+import java.io.File;
 
 /**
  * Launcher entry point. Hosts four Fragments under a BottomNavigationView.
@@ -97,6 +100,14 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
                 Toast.makeText(this, "Please allow 'All Files Access' to use Custom Storage Path", Toast.LENGTH_LONG).show();
+            } else {
+                // Ensure custom directory exists if we have permission
+                File customDir = new File("/storage/emulated/0/Android/DjavaLauncher/files/");
+                if (!customDir.exists()) {
+                    if (customDir.mkdirs()) {
+                        Log.i("MainActivity", "Created custom storage directory: " + customDir.getAbsolutePath());
+                    }
+                }
             }
         }
     }
