@@ -100,9 +100,12 @@ void UISettings::Initialize(const ImVec2& display_size)
 
 	/* chat */
 	m_chatPos = m_chatPos * m_scaleFactor;
-	m_chatSize.y = m_chatItemSize.y * m_chatDispMesssages;
+	m_chatSize.x = pSettings->Get().fChatSizeX;
+	m_chatSize.y = pSettings->Get().fChatSizeY;
 	m_chatSize = m_chatSize * m_scaleFactor;
-	m_chatItemSize = m_chatItemSize * m_scaleFactor;
+	m_chatItemSize.x = m_chatSize.x;
+	m_chatItemSize.y = m_chatSize.y / m_chatDispMesssages;
+	//m_chatItemSize = m_chatItemSize * m_scaleFactor;
 
 	/* spawn */
 	m_spawnPos = m_spawnPos * m_scaleFactor;
