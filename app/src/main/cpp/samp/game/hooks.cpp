@@ -1135,15 +1135,17 @@ void CRadar_ClearBlip_hook(uint32_t a2)
 void ReadSettingFile();
 void ApplyFPSPatch();
 void (*NvUtilInit)();
-extern CSettings* pSettings;
 void NvUtilInit_hook()
 {
     FLog("NvUtilInit");
 
     NvUtilInit();
 
-    g_pszStorage = (char*)(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8)); // StorageRootBuffer
+    // Default GTA storage path pointer
+    char* storageBuffer = (char*)(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8));
 
+    // Initial read of settings from default path
+    g_pszStorage = storageBuffer;
     ReadSettingFile();
 
     if(pSettings->Get().bCustomStorage)
@@ -1151,12 +1153,16 @@ void NvUtilInit_hook()
         static const char* customPath = "/storage/emulated/0/Android/DjavaLauncher/files/";
         FLog("Applying custom storage path: %s", customPath);
 
+        // Update our global SAMP storage pointer
         g_pszStorage = (char*)customPath;
 
-        // Primary Storage Pointer
+        // Patch libGTASA internal pointers to use the custom path
+        // This ensures the game engine itself (FileMgr, etc.) uses our folder
         CHook::Write(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8), &customPath);
-        // Secondary Storage Pointer
         CHook::Write(g_libGTASA + (VER_x32 ? 0x6796A0 : 0x850D50), &customPath);
+        
+        // Re-read settings from the NEW path to allow custom settings per folder
+        ReadSettingFile();
     }
 
     ApplyFPSPatch();
