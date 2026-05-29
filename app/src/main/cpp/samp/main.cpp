@@ -82,6 +82,7 @@ int work = 0;
 
 void ReadSettingFile()
 {
+    if(pSettings) delete pSettings;
 	pSettings = new CSettings();
 
 	firebase::crashlytics::SetUserId(pSettings->Get().szNickName);
@@ -461,17 +462,34 @@ uint32_t GetTickCount()
     return CTimer::m_snTimeInMillisecondsNonClipped;
 }
 
+// Global file pointers for loggers to allow resetting
+static FILE* flFLog = nullptr;
+static FILE* flCrashLog = nullptr;
+static FILE* flChatLog = nullptr;
+static FILE* flMyLog = nullptr;
+static FILE* flMyLog2 = nullptr;
+static FILE* flVoiceLog = nullptr;
+
+void CloseLogFiles()
+{
+    if(flFLog) { fclose(flFLog); flFLog = nullptr; }
+    if(flCrashLog) { fclose(flCrashLog); flCrashLog = nullptr; }
+    if(flChatLog) { fclose(flChatLog); flChatLog = nullptr; }
+    if(flMyLog) { fclose(flMyLog); flMyLog = nullptr; }
+    if(flMyLog2) { fclose(flMyLog2); flMyLog2 = nullptr; }
+    if(flVoiceLog) { fclose(flVoiceLog); flVoiceLog = nullptr; }
+}
+
 void FLog(const char* fmt, ...)
 {
 	char buffer[0xFF];
-	static FILE* flLog = nullptr;
 	const char* pszStorage = g_pszStorage;
 
 
-	if (flLog == nullptr && pszStorage != nullptr)
+	if (flFLog == nullptr && pszStorage != nullptr)
 	{
 		sprintf(buffer, "%s/samp_log.txt", pszStorage);
-		flLog = fopen(buffer, "a");
+		flFLog = fopen(buffer, "a");
 	}
 
 	memset(buffer, 0, sizeof(buffer));
@@ -483,9 +501,9 @@ void FLog(const char* fmt, ...)
 
 	LOGI("%s", buffer);
 
-	if (flLog == nullptr) return;
-	fprintf(flLog, "%s\n", buffer);
-	fflush(flLog);
+	if (flFLog == nullptr) return;
+	fprintf(flFLog, "%s\n", buffer);
+	fflush(flFLog);
 
 	return;
 }
@@ -493,14 +511,13 @@ void FLog(const char* fmt, ...)
 void crashlyticsLog(const char* fmt, ...)
 {
 	char buffer[0xFF];
-	static FILE* flLog = nullptr;
 	const char* pszStorage = g_pszStorage;
 
 
-	if (flLog == nullptr && pszStorage != nullptr)
+	if (flCrashLog == nullptr && pszStorage != nullptr)
 	{
 		sprintf(buffer, "%s/crashlytics_log.txt", pszStorage);
-		flLog = fopen(buffer, "a");
+		flCrashLog = fopen(buffer, "a");
 	}
 
 	memset(buffer, 0, sizeof(buffer));
@@ -513,9 +530,9 @@ void crashlyticsLog(const char* fmt, ...)
 	LOGI("%s", buffer);
 	firebase::crashlytics::Log(buffer);
 
-	if (flLog == nullptr) return;
-	fprintf(flLog, "%s\n", buffer);
-	fflush(flLog);
+	if (flCrashLog == nullptr) return;
+	fprintf(flCrashLog, "%s\n", buffer);
+	fflush(flCrashLog);
 
 	return;
 }
@@ -523,14 +540,13 @@ void crashlyticsLog(const char* fmt, ...)
 void ChatLog(const char* fmt, ...)
 {
 	char buffer[0xFF];
-	static FILE* flLog = nullptr;
 	const char* pszStorage = g_pszStorage;
 
 
-	if (flLog == nullptr && pszStorage != nullptr)
+	if (flChatLog == nullptr && pszStorage != nullptr)
 	{
 		sprintf(buffer, "%s/chat_log.txt", pszStorage);
-		flLog = fopen(buffer, "a");
+		flChatLog = fopen(buffer, "a");
 	}
 
 	memset(buffer, 0, sizeof(buffer));
@@ -540,9 +556,9 @@ void ChatLog(const char* fmt, ...)
 	vsnprintf(buffer, sizeof(buffer), fmt, arg);
 	va_end(arg);
 
-	if (flLog == nullptr) return;
-	fprintf(flLog, "%s\n", buffer);
-	fflush(flLog);
+	if (flChatLog == nullptr) return;
+	fprintf(flChatLog, "%s\n", buffer);
+	fflush(flChatLog);
 
 	return;
 }
@@ -550,15 +566,14 @@ void ChatLog(const char* fmt, ...)
 void MyLog(const char* fmt, ...)
 {
 	char buffer[0xFF];
-	static FILE* flLog = nullptr;
 	const char* pszStorage = g_pszStorage;
 
 
-	if (flLog == nullptr && pszStorage != nullptr)
+	if (flMyLog == nullptr && pszStorage != nullptr)
 	{
 		sprintf(buffer, "%s/samp_log.txt", pszStorage);
 		//LOGI("buffer: %s", buffer);
-		flLog = fopen(buffer, "a");
+		flMyLog = fopen(buffer, "a");
 	}
 
 	memset(buffer, 0, sizeof(buffer));
@@ -568,9 +583,9 @@ void MyLog(const char* fmt, ...)
 	vsnprintf(buffer, sizeof(buffer), fmt, arg);
 	va_end(arg);
 
-	if (flLog == nullptr) return;
-	fprintf(flLog, "%s\n", buffer);
-	fflush(flLog);
+	if (flMyLog == nullptr) return;
+	fprintf(flMyLog, "%s\n", buffer);
+	fflush(flMyLog);
 
 	return;
 }
@@ -578,15 +593,14 @@ void MyLog(const char* fmt, ...)
 void MyLog2(const char* fmt, ...)
 {
 	char buffer[0xFF];
-	static FILE* flLog = nullptr;
 	const char* pszStorage = g_pszStorage;
 
 
-	if (flLog == nullptr && pszStorage != nullptr)
+	if (flMyLog2 == nullptr && pszStorage != nullptr)
 	{
 		sprintf(buffer, "%s/samp_log.txt", pszStorage);
 		//LOGI("buffer: %s", buffer);
-		flLog = fopen(buffer, "a");
+		flMyLog2 = fopen(buffer, "a");
 	}
 
 	memset(buffer, 0, sizeof(buffer));
@@ -598,22 +612,21 @@ void MyLog2(const char* fmt, ...)
 
 	if (pUI) pUI->chat()->addDebugMessage(buffer);
 
-	if (flLog == nullptr) return;
-	fprintf(flLog, "%s\n", buffer);
-	fflush(flLog);
+	if (flMyLog2 == nullptr) return;
+	fprintf(flMyLog2, "%s\n", buffer);
+	fflush(flMyLog2);
 	return;
 }
 
 void LogVoice(const char* fmt, ...)
 {
 	char buffer[0xFF];
-	static FILE* flLog = nullptr;
 	const char* pszStorage = g_pszStorage;
 
-	if (flLog == nullptr && pszStorage != nullptr)
+	if (flVoiceLog == nullptr && pszStorage != nullptr)
 	{
 		sprintf(buffer, "%sSAMP/%s", pszStorage, SV::kLogFileName);
-		flLog = fopen(buffer, "w");
+		flVoiceLog = fopen(buffer, "w");
 	}
 
 	memset(buffer, 0, sizeof(buffer));
@@ -625,9 +638,9 @@ void LogVoice(const char* fmt, ...)
 
 	__android_log_write(ANDROID_LOG_INFO, "AXL", buffer);
 
-	if (flLog == nullptr) return;
-	fprintf(flLog, "%s\n", buffer);
-	fflush(flLog);
+	if (flVoiceLog == nullptr) return;
+	fprintf(flVoiceLog, "%s\n", buffer);
+	fflush(flVoiceLog);
 
 	return;
 }

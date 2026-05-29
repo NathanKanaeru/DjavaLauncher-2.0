@@ -1134,6 +1134,7 @@ void CRadar_ClearBlip_hook(uint32_t a2)
 
 void ReadSettingFile();
 void ApplyFPSPatch();
+void CloseLogFiles();
 void (*NvUtilInit)();
 void NvUtilInit_hook()
 {
@@ -1153,15 +1154,17 @@ void NvUtilInit_hook()
         static const char* customPath = "/storage/emulated/0/Android/DjavaLauncher/files/";
         FLog("Applying custom storage path: %s", customPath);
 
+        // Close existing logs at the default path
+        CloseLogFiles();
+
         // Update our global SAMP storage pointer
         g_pszStorage = (char*)customPath;
 
         // Patch libGTASA internal pointers to use the custom path
-        // This ensures the game engine itself (FileMgr, etc.) uses our folder
         CHook::Write(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8), &customPath);
         CHook::Write(g_libGTASA + (VER_x32 ? 0x6796A0 : 0x850D50), &customPath);
         
-        // Re-read settings from the NEW path to allow custom settings per folder
+        // Re-read settings from the NEW path
         ReadSettingFile();
     }
 
