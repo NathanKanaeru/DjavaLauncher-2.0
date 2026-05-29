@@ -1453,29 +1453,34 @@ int OS_FileRead_hook(void* a1, void* a2, int a3)
     return ret;
 }
 
+// Original RLE function pointer
+void (*orig_RLEDecompress)(uint8_t* dest, size_t destSize, const uint8_t* src, size_t segSize, uint32_t escape) = nullptr;
 void RLEDecompress_hook(uint8_t* dest, size_t destSize, const uint8_t* src, size_t segSize, uint32_t escape)
 {
-    if (!dest || !src || destSize == 0 || segSize == 0) return;
+    // ตรวจสอบพอยน์เตอร์และค่าพื้นฐานก่อน
+    if (!dest || !src || destSize == 0 || segSize == 0 || dwRLEDecompressSourceSize == 0 || !orig_RLEDecompress)
+    {
+        orig_RLEDecompress(dest, destSize, src, segSize, escape);
+        return;
+    }
 
     uint8_t* out = dest;
     const uint8_t* in = src;
+    const uint8_t* in_end  = src + dwRLEDecompressSourceSize;
     const uint8_t* out_end = dest + destSize;
-    const uint8_t* in_end = (dwRLEDecompressSourceSize > 0)
-        ? src + dwRLEDecompressSourceSize
-        : src + destSize + 4096;
 
     while (out < out_end && in < in_end)
     {
         if (*in == escape)
         {
-            if (in + 2 >= in_end) break;
+            if (in + 2 >= in_end) break;                    // ไม่มี count หรือ segment
             uint8_t count = in[1];
-            if (count == 0) { in += 2; continue; }
+            if (count == 0) { in += 2; continue; }          // escape literal
 
-            if (in + 2 + segSize > in_end) break;
+            if (in + 2 + segSize > in_end) break;           // ข้อมูลไม่ครบ
 
             size_t bytes_to_copy = (size_t)count * segSize;
-            if (out + bytes_to_copy > out_end) break;
+            if (out + bytes_to_copy > out_end) break;       // ป้องกัน buffer overflow
 
             const uint8_t* segment = in + 2;
             for (uint8_t i = 0; i < count; ++i)
@@ -1494,7 +1499,14 @@ void RLEDecompress_hook(uint8_t* dest, size_t destSize, const uint8_t* src, size
         }
     }
 
+    // รีเซ็ตทุกครั้ง ป้องกัน reuse ค่าเก่า
     dwRLEDecompressSourceSize = 0;
+
+    // ถ้ายังเขียนไม่ครบ dest (กรณี rare มาก) ให้ฟังก์ชันเดิมช่วยต่อ
+    if (out < out_end)
+    {
+        orig_RLEDecompress(out, out_end - out, in, segSize, escape);
+    }
 }
 
 void (*CGame_Process)();
@@ -1669,7 +1681,7 @@ void InjectHooks()
     CCustomBuildingDNPipeline::InjectHooks();
     //CWidgetRadar::InjectHooks();
 
-    CRealTimeShadowManager::InjectHooks();
+    //CRealTimeShadowManager::InjectHooks();
     COcclusion::InjectHooks();
 }
 
@@ -1690,9 +1702,9 @@ void InstallSpecialHooks()
 
     CHook::RET("_ZN4CPed31RemoveWeaponWhenEnteringVehicleEi"); // CPed::RemoveWeaponWhenEnteringVehicle
 
-    CHook::Redirect(g_libGTASA + (VER_x32 ? 0x1E7317 : 0x283030), &RLEDecompress_hook);
+    //CHook::InstallPLT(g_libGTASA + (VER_x32 ? 0x6701D4 : 0x840708), &RLEDecompress_hook, &orig_RLEDecompress);
 
-    CHook::InlineHook("_Z11OS_FileReadPvS_i", &OS_FileRead_hook, &OS_FileRead);
+    //CHook::InlineHook("_Z11OS_FileReadPvS_i", &OS_FileRead_hook, &OS_FileRead);
 
 	CHook::InlineHook("_Z32_rxOpenGLDefaultAllInOneRenderCBP10RwResEntryPvhj", &rxOpenGLDefaultAllInOneRenderCB_hook, &rxOpenGLDefaultAllInOneRenderCB);
 	CHook::InlineHook("_ZN25CCustomBuildingDNPipeline18CustomPipeRenderCBEP10RwResEntryPvhj", &CCustomBuildingDNPipeline__CustomPipeRenderCB_hook, &CCustomBuildingDNPipeline__CustomPipeRenderCB);
