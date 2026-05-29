@@ -1157,13 +1157,13 @@ void NvUtilInit_hook()
         // Close existing logs at the default path
         CloseLogFiles();
 
-        // Update our global SAMP storage pointer
-        g_pszStorage = (char*)customPath;
+        // Safely copy the custom path into the engine's buffer
+        // Note: storageBuffer in GTA SA is usually large enough (0x100+ bytes)
+        strcpy(storageBuffer, customPath);
 
-        // Patch libGTASA internal pointers to use the custom path
-        CHook::Write(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8), &customPath);
-        CHook::Write(g_libGTASA + (VER_x32 ? 0x6796A0 : 0x850D50), &customPath);
-        
+        // Update our global SAMP storage pointer (it already points to storageBuffer, but for clarity)
+        g_pszStorage = storageBuffer;
+
         // Re-read settings from the NEW path
         ReadSettingFile();
     }
@@ -1609,6 +1609,27 @@ CEntityGTA* CFileLoader__LoadObjectInstance_hook(CFileObjectInstance *pObject, c
     return CFileLoader__LoadObjectInstance(pObject, pName);
 }
 
+void (*orig_CColAccel_startCache)();
+void CColAccel_startCache_hook()
+{
+    orig_CColAccel_startCache();
+}
+
+void (*orig_CColAccel_cacheLoadCol)();
+void CColAccel_cacheLoadCol_hook()
+{
+    orig_CColAccel_cacheLoadCol();
+}
+
+void (*orig_CColAccel_endCache)();
+void CColAccel_endCache_hook()
+{
+    uint32_t* pCacheState = (uint32_t*)(g_libGTASA + (VER_x32 ? 0x9AE250 : 0xBB8250)); // m_iCacheState
+    if (pCacheState && *pCacheState != 0) {
+        orig_CColAccel_endCache();
+    }
+}
+
 void (*CAEWeatherAudioEntity__UpdateParameter)(uintptr_t thiz, uintptr_t a1, uint16_t a2);
 void CAEWeatherAudioEntity__UpdateParameter_hook(uintptr_t thiz, uintptr_t a1, uint16_t a2)
 {
@@ -1711,6 +1732,10 @@ void InstallSpecialHooks()
     CHook::InstallPLT(g_libGTASA + (VER_x32 ? 0x6701D4 : 0x840708), &RLEDecompress_hook, &orig_RLEDecompress);
     CHook::InlineHook("_ZN22TextureDatabaseRuntime15LoadFullTextureEj", &LoadFullTexture_hook, &LoadFullTexture);
     CHook::InlineHook("_Z11OS_FileReadPvS_i", &OS_FileRead_hook, &orig_OS_FileRead);
+
+    CHook::InlineHook(g_libGTASA + (VER_x32 ? 0x465FC0 + 1 : 0x5511E0), &CColAccel_startCache_hook, &orig_CColAccel_startCache);
+    CHook::InlineHook(g_libGTASA + (VER_x32 ? 0x4664D0 + 1 : 0x551760), &CColAccel_cacheLoadCol_hook, &orig_CColAccel_cacheLoadCol);
+    CHook::InlineHook(g_libGTASA + (VER_x32 ? 0x4662AC + 1 : 0x551534), &CColAccel_endCache_hook, &orig_CColAccel_endCache);
 
 	CHook::InlineHook("_Z32_rxOpenGLDefaultAllInOneRenderCBP10RwResEntryPvhj", &rxOpenGLDefaultAllInOneRenderCB_hook, &rxOpenGLDefaultAllInOneRenderCB);
 	CHook::InlineHook("_ZN25CCustomBuildingDNPipeline18CustomPipeRenderCBEP10RwResEntryPvhj", &CCustomBuildingDNPipeline__CustomPipeRenderCB_hook, &CCustomBuildingDNPipeline__CustomPipeRenderCB);
