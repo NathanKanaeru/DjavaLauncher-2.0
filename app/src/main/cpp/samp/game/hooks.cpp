@@ -1148,7 +1148,7 @@ void NvUtilInit_hook()
 
     if(pSettings->Get().bCustomStorage)
     {
-        static const char* customPath = "/storage/emulated/0/Android/data/com.nathan/djavarp/files/";
+        static const char* customPath = "/storage/emulated/0/Android/DjavaLauncher/files/";
         FLog("Applying custom storage path: %s", customPath);
 
         g_pszStorage = (char*)customPath;
