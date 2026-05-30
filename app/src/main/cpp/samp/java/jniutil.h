@@ -43,8 +43,11 @@ public:
 	void ShowEditObject();
 	void HideEditObject();
 
+	void AddChatMessage(const char* utf8Message);
+
     jobject activity;
     jmethodID s_setPauseState;
+    jmethodID s_addChatMessage;
     jmethodID s_showLoadingScreen;
     jmethodID s_hideLoadingScreen;
     jmethodID s_ShowDialog;

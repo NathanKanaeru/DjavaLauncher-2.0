@@ -33,6 +33,8 @@ CJavaWrapper::CJavaWrapper(JNIEnv *env, jobject activity)
     s_showEditObject = env->GetMethodID(clas, "showEditObject", "()V");
     s_hideEditObject = env->GetMethodID(clas, "hideEditObject", "()V");
 
+    s_addChatMessage = env->GetMethodID(clas, "addChatMessage", "(Ljava/lang/String;)V");
+
     env->DeleteLocalRef(clas);
 }
 
@@ -190,4 +192,20 @@ void CJavaWrapper::HideEditObject() {
     }
 
     env->CallVoidMethod(this->activity, this->s_hideEditObject);
+}
+
+void CJavaWrapper::AddChatMessage(const char* utf8Message) {
+    JNIEnv* env;
+    javaVM->GetEnv((void**)&env, JNI_VERSION_1_6);
+
+    if (!env)
+    {
+        FLog("No env");
+        return;
+    }
+
+    jstring jmsg = env->NewStringUTF(utf8Message);
+    env->CallVoidMethod(this->activity, this->s_addChatMessage, jmsg);
+    EXCEPTION_CHECK(env);
+    env->DeleteLocalRef(jmsg);
 }

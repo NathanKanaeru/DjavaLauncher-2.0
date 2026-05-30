@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.joom.paranoid.Obfuscate;
 import com.nathan.djavarp.game.ui.AttachEdit;
+import com.nathan.djavarp.game.ui.ChatWindow;
 import com.nathan.djavarp.game.ui.CustomKeyboard;
 import com.nathan.djavarp.game.ui.LoadingScreen;
 import androidx.activity.OnBackPressedCallback;
@@ -29,6 +30,7 @@ public class SAMP extends GTASA implements CustomKeyboard.InputListener, HeightP
 
     private AttachEdit mAttachEdit;
     private LoadingScreen mLoadingScreen;
+    private ChatWindow mChatWindow;
 
     //public native void sendDialogResponse(int i, int i2, int i3, byte[] str);
 
@@ -87,6 +89,12 @@ public class SAMP extends GTASA implements CustomKeyboard.InputListener, HeightP
                 }
             }
         });
+    }
+
+    public void addChatMessage(String message) {
+        if (mChatWindow != null) {
+            mChatWindow.AddChatMessage(message);
+        }
     }
 
     public void exitGame(){
@@ -187,6 +195,8 @@ public class SAMP extends GTASA implements CustomKeyboard.InputListener, HeightP
         mAttachEdit = new AttachEdit(this);
 
         mLoadingScreen = new LoadingScreen(this);
+
+        mChatWindow = new ChatWindow(this);
 
         instance = this;
 

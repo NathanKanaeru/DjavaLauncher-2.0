@@ -62,6 +62,18 @@ void Chat::addMessage(const std::string& message, const ImColor& color)
 	MessageItem* item = new MessageItem(message, color);
 	this->addItem(item);
 	/*if(!active())*/ this->setScrollY(1.0f);
+
+	// Forward to Java chat window
+	if (pJavaWrapper)
+	{
+		char colorStr[8];
+		sprintf(colorStr, "{%02X%02X%02X}",
+			(int)(color.Value.x * 255),
+			(int)(color.Value.y * 255),
+			(int)(color.Value.z * 255));
+		std::string coloredMsg = colorStr + message;
+		pJavaWrapper->AddChatMessage(coloredMsg.c_str());
+	}
 }
 
 void Chat::addPlayerMessage(const std::string& message, const std::string& nick, const ImColor& nick_color)
@@ -74,6 +86,18 @@ void Chat::addPlayerMessage(const std::string& message, const std::string& nick,
 	PlayerMessageItem* item = new PlayerMessageItem(message, nick, nick_color);
 	this->addItem(item);
 	/*if(!active())*/ this->setScrollY(1.0f);
+
+	// Forward to Java chat window
+	if (pJavaWrapper)
+	{
+		char nickColorStr[8];
+		sprintf(nickColorStr, "{%02X%02X%02X}",
+			(int)(nick_color.Value.x * 255),
+			(int)(nick_color.Value.y * 255),
+			(int)(nick_color.Value.z * 255));
+		std::string formatted = nickColorStr + nick + "{FFFFFF}: " + message;
+		pJavaWrapper->AddChatMessage(formatted.c_str());
+	}
 }
 
 void Chat::draw(ImGuiRenderer* renderer)

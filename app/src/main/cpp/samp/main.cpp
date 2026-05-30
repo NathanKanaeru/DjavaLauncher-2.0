@@ -308,6 +308,27 @@ extern "C" {
 				pJavaWrapper->HideKeyboard();
 		}
 	}
+	JNIEXPORT void JNICALL Java_com_nathan_djavarp_game_ui_ChatWindow_SendChatMessage(JNIEnv* pEnv, jobject thiz, jbyteArray str)
+	{
+		jbyte* pMsg = pEnv->GetByteArrayElements(str, nullptr);
+		jsize length = pEnv->GetArrayLength(str);
+
+		std::string szStr((char*)pMsg, length);
+
+		if (pNetGame)
+		{
+			if (szStr.length() > 0)
+			{
+				if (szStr[0] == '/')
+					pNetGame->SendChatCommand(szStr.c_str());
+				else
+					pNetGame->SendChatMessage(szStr.c_str());
+			}
+		}
+
+		pEnv->ReleaseByteArrayElements(str, pMsg, JNI_ABORT);
+	}
+
 	JNIEXPORT void JNICALL Java_com_nathan_djavarp_game_ui_dialog_DialogManager_sendDialogResponse(JNIEnv* pEnv, jobject thiz, jint i3, jint i, jint i2, jbyteArray str)
 	{
 		jboolean isCopy = true;
