@@ -1,0 +1,91 @@
+CPools::Initialise
+
+Loading vehicles.ide..
+
+Loading peds.ide..
+
+Loading gta.dat..
+
+Loading script.img..
+
+Fail open file /storage/emulated/0/Android/DjavaLauncher/files/TEXDB/CUTSCENE.IMG
+
+NVFOpen hook | Error: file not found (/storage/emulated/0/Android/DjavaLauncher/files/TEXDB/CUTSCENE.IMG)
+
+Loading script.img..
+
+Fail open file /storage/emulated/0/Android/DjavaLauncher/files/TEXDB/CUTSCENE.IMG
+
+NVFOpen hook | Error: file not found (/storage/emulated/0/Android/DjavaLauncher/files/TEXDB/CUTSCENE.IMG)
+
+SIGSEGV | Fault address: 0x8
+
+========== REGISTER STATES (64-Bit) ==========
+
+x0:  0x0000000000000000  x1:  0x0000007ac48f3b30  x2:  0x0000000000000004  x3:  0x0000007aab659258
+
+x4:  0x0000000000000038  x5:  0x80000000aaaa0a80  x6:  0xff4d48412d4e454d  x7:  0x7f7f7f7f7f7f7f7f
+
+x8:  0x3a5943cb52397525  x9:  0x3a5943cb52397525  x10: 0x0000000000000050  x11: 0x0000000000038004
+
+x12: 0xffffff80ffffffd0  x13: 0x0000007aab6591c0  x14: 0x0000000000000000  x15: 0xb400007d21925e30
+
+x16: 0x0000007ac44f3720  x17: 0x0000007ac3fca548  x18: 0x000000000000040f  x19: 0x0000000000000004
+
+x20: 0x0000000000000000  x21: 0x0000007ac48f3b20  x22: 0x0000000000000001  x23: 0x0000007ac456c780
+
+x24: 0x0000007ac49eb000  x25: 0x0000007ac49eb640  x26: 0x0000007ac48cbe40  x27: 0x0000007ac49eb000
+
+x28: 0x0000000000007531  FP:  0x0000007aab659520  LR:  0x0000007ac4180cc8  SP:  0x0000007aab659510
+
+PC:  0x0000007ac3fca558
+
+ 
+
+Possible Offsets:
+
+  libGTASA.so (64-Bit) + 0x31c558 (PC)
+
+  libGTASA.so (64-Bit) + 0x4d2cc8 (LR)
+
+  libsamp.so  (64-Bit) + 0x4f97558 (PC)
+
+  libsamp.so  (64-Bit) + 0x514dcc8 (LR)
+
+!!! CRASH INSIDE VALID 64-BIT GTA RANGE (0x0 - 0x11F3B00) !!!
+
+Last rendered object: 0
+
+------------ START BACKTRACE ------------
+
+ 
+
+[adr: 0x0000007abf20dc90 | samp: +0x1dac90 | gta: +0xfffffffffb55fc90] _Z7handleriP7siginfoPv
+
+[adr: 0x0000007ecae74f98 | samp: +0x40be41f98 | gta: +0x4071c6f98] _ZN3art11SignalChain7HandlerEiP7siginfoPv
+
+[adr: 0x0000007f0046989c | samp: +0x44143689c | gta: +0x43c7bb89c] __kernel_rt_sigreturn
+
+[adr: 0x0000007ac3fca558 | samp: +0x4f97558 | gta: +0x31c558] _Z12OS_FileWritePvPKvi
+
+[adr: 0x0000007ac4180cc8 | samp: +0x514dcc8 | gta: +0x4d2cc8] _ZN8CFileMgr5WriteEyPci
+
+[adr: 0x0000007ac41ff580 | samp: +0x51cc580 | gta: +0x551580] _ZN9CColAccel8endCacheEv
+
+[adr: 0x0000007ac4183aa0 | samp: +0x5150aa0 | gta: +0x4d5aa0] _ZN5CGame10InitialiseEPKc
+
+[adr: 0x0000007ac418740c | samp: +0x515440c | gta: +0x4d940c] _Z14InitialiseGamev
+
+[adr: 0x0000007ac43b8400 | samp: +0x5385400 | gta: +0x70a400] _Z11DoGameStatev
+
+[adr: 0x0000007ac43b8ca0 | samp: +0x5385ca0 | gta: +0x70aca0] _Z12MainGameFuncPv
+
+[adr: 0x0000007ac3fcfb60 | samp: +0x4f9cb60 | gta: +0x321b60] _Z12ANDRunThreadPv
+
+[adr: 0x0000007ac3fe014c | samp: +0x4fad14c | gta: +0x33214c] (no symbol)
+
+[adr: 0x0000007ecaefb66c | samp: +0x40bec866c | gta: +0x40724d66c] (no symbol)
+
+[adr: 0x0000007ecaeeca04 | samp: +0x40beb9a04 | gta: +0x40723ea04] (no symbol)
+
+------------ END BACKTRACE ------------

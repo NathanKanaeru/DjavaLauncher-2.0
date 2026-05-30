@@ -800,9 +800,6 @@ bool CGame::InitialiseRenderWare() {
     CHook::CallFunction<void>(g_libGTASA + (VER_x32 ? 0x005B1188 + 1 : 0x6D5970)); // CPlayerSkin::Initialise();
     CHook::CallFunction<void>(g_libGTASA + (VER_x32 ? 0x005B28D4 + 1 : 0x6D6E30)); // CPostEffects::Initialise();
 
-    // CRealTimeShadowManager::Init()
-    CHook::CallFunction<void>(g_libGTASA + (VER_x32 ? 0x005b8291 : 0x006dc9f0), g_libGTASA + (VER_x32 ? 0x00a4816c : 0x00ceb040));
-
     CGame::m_pWorkingMatrix1 = RwMatrixCreate();
     CGame::m_pWorkingMatrix2 = RwMatrixCreate();
 
@@ -978,9 +975,6 @@ void CGame::Process() {
         ((void (*)()) (g_libGTASA + (VER_x32 ? 0x005A3E40 + 1 : 0x6C75E4)))(); // CCoronas::DoSunAndMoon()
         ((void (*)()) (g_libGTASA + (VER_x32 ? 0x005A22C8 + 1 : 0x6C5BE0)))(); // CCoronas::Update()
         ((void (*)()) (g_libGTASA + (VER_x32 ? 0x005BD370 + 1 : 0x6E1BC4)))(); // CShadows::UpdatePermanentShadows()
-
-        // CRealTimeShadowManager::Update()
-        CHook::CallFunction<void>(g_libGTASA + (VER_x32 ? 0x005b846d : 0x006dcc30), g_libGTASA + (VER_x32 ? 0x00a4816c : 0x00ceb040));
 
         // CPlantMgr::Update
 

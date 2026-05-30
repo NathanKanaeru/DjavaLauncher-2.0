@@ -1134,6 +1134,7 @@ void CRadar_ClearBlip_hook(uint32_t a2)
 
 void ReadSettingFile();
 void ApplyFPSPatch();
+void CloseLogFiles();
 void (*NvUtilInit)();
 void NvUtilInit_hook()
 {
@@ -1141,9 +1142,31 @@ void NvUtilInit_hook()
 
     NvUtilInit();
 
-    g_pszStorage = (char*)(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8)); // StorageRootBuffer
+    // Default GTA storage path pointer
+    char* storageBuffer = (char*)(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8));
 
+    // Initial read of settings from default path
+    g_pszStorage = storageBuffer;
     ReadSettingFile();
+
+    if(pSettings->Get().bCustomStorage)
+    {
+        static const char* customPath = "/storage/emulated/0/Android/DjavaLauncher/files/";
+        FLog("Applying custom storage path: %s", customPath);
+
+        // Close existing logs at the default path
+        CloseLogFiles();
+
+        // Update our global SAMP storage pointer
+        g_pszStorage = (char*)customPath;
+
+        // Patch libGTASA internal pointers to use the custom path
+        CHook::Write(g_libGTASA + (VER_x32 ? 0x6D687C : 0x8B46A8), &customPath);
+        CHook::Write(g_libGTASA + (VER_x32 ? 0x6796A0 : 0x850D50), &customPath);
+        
+        // Re-read settings from the NEW path
+        ReadSettingFile();
+    }
 
     ApplyFPSPatch();
 }
@@ -1424,88 +1447,71 @@ bool RwResourcesFreeResEntry_hook(void* entry)
     return result;
 }
 
-extern "C" int OS_FileRead(void* file, void* buf, int len);
-__attribute__((weak)) int OS_FileRead(void* file, void* buf, int len) { return 0; }
+#include <stdexcept>
 
-static int (*orig_OS_FileRead)(void*, void*, int) = nullptr;
+static uint32_t dwRLEDecompressSourceSize = 0;
 
-uint32_t dwRLEDecompressSourceSize = 0;
-
-// Hook
-int OS_FileRead_hook(void* a1, void* a2, int a3)
+size_t (*orig_OS_FileRead)(void* a1, void *buffer, size_t numBytes);
+size_t OS_FileRead_hook(void* a1, void *buffer, size_t numBytes)
 {
-    int ret = orig_OS_FileRead ? orig_OS_FileRead(a1, a2, a3) : 0;
+    dwRLEDecompressSourceSize = numBytes;
 
-    if (a3 >= 4)
-    {
-        uintptr_t caller = (uintptr_t)__builtin_return_address(0) - g_libGTASA;
-
-#ifdef VER_x32
-        if (caller == 0x1E91AC)  // 0.3.7 / x32
-#else
-        if (caller == 0x2858B8 || caller == 0x2858C0)  // 2.10 มี 2 จุดเรียกใกล้ ๆ กัน
-#endif
-        {
-            dwRLEDecompressSourceSize = *(uint32_t*)a2;
-        }
-    }
-
-    return ret;
+    return orig_OS_FileRead(a1, buffer, numBytes);
 }
 
-// Original RLE function pointer
-void (*orig_RLEDecompress)(uint8_t* dest, size_t destSize, const uint8_t* src, size_t segSize, uint32_t escape) = nullptr;
-void RLEDecompress_hook(uint8_t* dest, size_t destSize, const uint8_t* src, size_t segSize, uint32_t escape)
+char g_iLastBlock[123];
+
+int *(*LoadFullTexture)(TextureDatabaseRuntime *thiz, unsigned int a2);
+int *LoadFullTexture_hook(TextureDatabaseRuntime *thiz, unsigned int a2)
 {
-    // ตรวจสอบพอยน์เตอร์และค่าพื้นฐานก่อน
-    if (!dest || !src || destSize == 0 || segSize == 0 || dwRLEDecompressSourceSize == 0 || !orig_RLEDecompress)
-    {
-        orig_RLEDecompress(dest, destSize, src, segSize, escape);
+	strcpy(g_iLastBlock, thiz->name);
+
+    return LoadFullTexture(thiz, a2);
+}
+
+void (*orig_RLEDecompress)(uint8_t* pDest, size_t uiDestSize, uint8_t const* pSrc, size_t uiSegSize, uint32_t uiEscape);
+void RLEDecompress_hook(uint8_t* pDest, size_t uiDestSize, const uint8_t* pSrc, size_t uiSegSize, uint32_t uiEscape) {
+
+    if (!pDest || !pSrc || uiDestSize == 0 || uiSegSize == 0 || !orig_RLEDecompress) {
         return;
     }
 
-    uint8_t* out = dest;
-    const uint8_t* in = src;
-    const uint8_t* in_end  = src + dwRLEDecompressSourceSize;
-    const uint8_t* out_end = dest + destSize;
+    const uint8_t* pTempSrc = pSrc;
+    const uint8_t* const pEndOfDest = pDest + uiDestSize;
+    const uint8_t* const pEndOfSrc = pSrc + dwRLEDecompressSourceSize; // Предполагается, что dwRLEDecompressSourceSize определено правильно
 
-    while (out < out_end && in < in_end)
-    {
-        if (*in == escape)
-        {
-            if (in + 2 >= in_end) break;                    // ไม่มี count หรือ segment
-            uint8_t count = in[1];
-            if (count == 0) { in += 2; continue; }          // escape literal
+    try {
+        while (pDest < pEndOfDest && pTempSrc < pEndOfSrc) {
+            if (*pTempSrc == uiEscape) {
+                if (pTempSrc + 1 >= pEndOfSrc || pTempSrc[1] == 0 || pTempSrc + 2 + uiSegSize > pEndOfSrc) {
+                    // Обработка ошибки, неверное значение ucCurSeg atau недостаточно данных в исходном буфере
+                    throw std::runtime_error("rled error 1");
+                }
 
-            if (in + 2 + segSize > in_end) break;           // ข้อมูลไม่ครบ
-
-            size_t bytes_to_copy = (size_t)count * segSize;
-            if (out + bytes_to_copy > out_end) break;       // ป้องกัน buffer overflow
-
-            const uint8_t* segment = in + 2;
-            for (uint8_t i = 0; i < count; ++i)
-            {
-                memcpy(out, segment, segSize);
-                out += segSize;
+                uint8_t ucCurSeg = pTempSrc[1];
+                while (ucCurSeg--) {
+                    if (pDest + uiSegSize > pEndOfDest) {
+                        // Обработка ошибки, недостаточно места в целевом буфере
+                        throw std::runtime_error("rled error 2");
+                    }
+                    memcpy(pDest, pTempSrc + 2, uiSegSize);
+                    pDest += uiSegSize;
+                }
+                pTempSrc += 2 + uiSegSize;
+            } else {
+                if (pDest + uiSegSize > pEndOfDest || pTempSrc + uiSegSize > pEndOfSrc) {
+                    // Обработка ошибки, недостаточно данных в исходном буфере atau недостаточно места в целевом буфере
+                    throw std::runtime_error("rled error 3");
+                }
+                memcpy(pDest, pTempSrc, uiSegSize);
+                pDest += uiSegSize;
+                pTempSrc += uiSegSize;
             }
-            in += 2 + segSize;
         }
-        else
-        {
-            if (in + segSize > in_end || out + segSize > out_end) break;
-            memcpy(out, in, segSize);
-            out += segSize;
-            in += segSize;
-        }
-    }
 
-    // รีเซ็ตทุกครั้ง ป้องกัน reuse ค่าเก่า
-    dwRLEDecompressSourceSize = 0;
-
-    // ถ้ายังเขียนไม่ครบ dest (กรณี rare มาก) ให้ฟังก์ชันเดิมช่วยต่อ
-    if (out < out_end)
-    {
-        orig_RLEDecompress(out, out_end - out, in, segSize, escape);
+        dwRLEDecompressSourceSize = 0;
+    } catch (const std::exception& e) {
+        FLog("%s", e.what());
     }
 }
 
@@ -1681,7 +1687,7 @@ void InjectHooks()
     CCustomBuildingDNPipeline::InjectHooks();
     //CWidgetRadar::InjectHooks();
 
-    CRealTimeShadowManager::InjectHooks();
+    //CRealTimeShadowManager::InjectHooks();
     COcclusion::InjectHooks();
 }
 
@@ -1702,9 +1708,9 @@ void InstallSpecialHooks()
 
     CHook::RET("_ZN4CPed31RemoveWeaponWhenEnteringVehicleEi"); // CPed::RemoveWeaponWhenEnteringVehicle
 
-    //CHook::InstallPLT(g_libGTASA + (VER_x32 ? 0x6701D4 : 0x840708), &RLEDecompress_hook, &orig_RLEDecompress);
-
-    //CHook::InlineHook("_Z11OS_FileReadPvS_i", &OS_FileRead_hook, &OS_FileRead);
+    CHook::InstallPLT(g_libGTASA + (VER_x32 ? 0x6701D4 : 0x840708), &RLEDecompress_hook, &orig_RLEDecompress);
+    CHook::InlineHook("_ZN22TextureDatabaseRuntime15LoadFullTextureEj", &LoadFullTexture_hook, &LoadFullTexture);
+    CHook::InlineHook("_Z11OS_FileReadPvS_i", &OS_FileRead_hook, &orig_OS_FileRead);
 
 	CHook::InlineHook("_Z32_rxOpenGLDefaultAllInOneRenderCBP10RwResEntryPvhj", &rxOpenGLDefaultAllInOneRenderCB_hook, &rxOpenGLDefaultAllInOneRenderCB);
 	CHook::InlineHook("_ZN25CCustomBuildingDNPipeline18CustomPipeRenderCBEP10RwResEntryPvhj", &CCustomBuildingDNPipeline__CustomPipeRenderCB_hook, &CCustomBuildingDNPipeline__CustomPipeRenderCB);

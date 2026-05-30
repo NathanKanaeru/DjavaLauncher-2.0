@@ -75,6 +75,7 @@ public class SettingsFragment extends Fragment {
         // Advanced
         bindSwitch(view, R.id.row_debug, "Debug mode", R.drawable.ic_settings_m3, "debug", "debug", false);
         bindSwitch(view, R.id.row_online, "Online mode", R.drawable.ic_url, "debug", "online", true);
+        bindSwitch(view, R.id.row_custom_storage, "Custom Storage Path", R.drawable.ic_launcher_play, "client", "custom_storage", false);
     }
 
     // ---------- helpers ----------

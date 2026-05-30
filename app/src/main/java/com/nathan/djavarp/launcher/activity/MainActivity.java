@@ -18,6 +18,15 @@ import com.nathan.djavarp.launcher.fragment.HomeFragment;
 import com.nathan.djavarp.launcher.fragment.ServerFragment;
 import com.nathan.djavarp.launcher.fragment.SettingsFragment;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.Settings;
+import android.util.Log;
+import android.widget.Toast;
+
+import java.io.File;
+
 /**
  * Launcher entry point. Hosts four Fragments under a BottomNavigationView.
  * The actual game runs in {@link com.nathan.djavarp.game.SAMP} which the
@@ -28,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        checkPermissions();
 
         // Edge-to-edge so the green/black palette flows under the system bars.
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
@@ -73,5 +84,31 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, f)
                 .commit();
         return true;
+    }
+
+    private void checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                    intent.addCategory("android.intent.category.DEFAULT");
+                    intent.setData(Uri.parse(String.format("package:%s", getPackageName())));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+                Toast.makeText(this, "Please allow 'All Files Access' to use Custom Storage Path", Toast.LENGTH_LONG).show();
+            } else {
+                // Ensure custom directory exists if we have permission
+                File customDir = new File("/storage/emulated/0/Android/DjavaLauncher/files/");
+                if (!customDir.exists()) {
+                    if (customDir.mkdirs()) {
+                        Log.i("MainActivity", "Created custom storage directory: " + customDir.getAbsolutePath());
+                    }
+                }
+            }
+        }
     }
 }

@@ -225,6 +225,8 @@
                 <include android:id="@+id/row_debug" layout="@layout/item_setting_switch" />
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
                 <include android:id="@+id/row_online" layout="@layout/item_setting_switch" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/md_outline_variant" android:layout_marginStart="56dp" />
+                <include android:id="@+id/row_custom_storage" layout="@layout/item_setting_switch" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
