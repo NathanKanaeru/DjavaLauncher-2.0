@@ -222,29 +222,29 @@ void CPlayerPool::DeactivateAll()
 
 void CPlayerPool::ProcessAttachedObjects()
 {
-	if (m_pLocalPlayer)
-	{
-		CPlayerPed* pPlayerPed = m_pLocalPlayer->GetPlayerPed();
-		if (pPlayerPed)
-		{
-			pPlayerPed->ProcessSpecialAction(pPlayerPed->iSpecialAction);
-			pPlayerPed->ProcessAttach();
-            pPlayerPed->m_pPed->GetIntelligence()->ProcessAfterPreRender();
-		}
-	}
-
 	for (PLAYERID playerId = 0; playerId < MAX_PLAYERS; playerId++)
 	{
 		CRemotePlayer* pRemotePlayer = GetAt(playerId);
 		if (pRemotePlayer)
 		{
 			CPlayerPed* pPlayerPed = pRemotePlayer->GetPlayerPed();
-			if (pPlayerPed && pPlayerPed->m_pPed && !pPlayerPed->m_pPed->m_bRemoveFromWorld)
+			if (pPlayerPed && pPlayerPed->m_pPed &&
+				!pPlayerPed->m_pPed->m_bRemoveFromWorld &&
+				!pPlayerPed->m_pPed->m_bOffscreen)
 			{
-				pPlayerPed->ProcessSpecialAction(pPlayerPed->iSpecialAction);
 				pPlayerPed->ProcessAttach();
-                pPlayerPed->m_pPed->GetIntelligence()->ProcessAfterPreRender();
+				pPlayerPed->m_pPed->GetIntelligence()->ProcessAfterPreRender();
 			}
+		}
+	}
+
+	if (m_pLocalPlayer)
+	{
+		CPlayerPed* pPlayerPed = m_pLocalPlayer->GetPlayerPed();
+		if (pPlayerPed)
+		{
+			pPlayerPed->m_pPed->GetIntelligence()->ProcessAfterPreRender();
+			pPlayerPed->ProcessAttach();
 		}
 	}
 }

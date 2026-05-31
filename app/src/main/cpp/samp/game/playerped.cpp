@@ -2343,87 +2343,59 @@ void CPlayerPed::FlushAttach()
 void CPlayerPed::ProcessAttach()
 {
     if(!m_pPed) return;
+
+    const bool bIsAdded = m_pPed->IsAdded();
     bool needRender = true;
 
-    if(m_pPed->IsInVehicle() && m_pPed->pVehicle->IsRCVehicleModelID())
-        needRender = false;
-
-    m_pPed->UpdateRpHAnim();
-
-    if (m_pPed->IsAdded())
+    if (bIsAdded)
     {
+        m_pPed->UpdateRpHAnim();
         ProcessHeadMatrix();
     }
-    for (auto iter : m_aAttachedObject)
+
+    if (m_pPed->IsInVehicle() && m_pPed->pVehicle->IsRCVehicleModelID())
+        needRender = false;
+
+    RpHAnimHierarchy* hierarchy = bIsAdded ? GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump) : nullptr;
+
+    for (const auto& iter : m_aAttachedObject)
     {
-        auto attach = iter.second;
-
+        const auto& attach = iter.second;
         CObject* pObject = attach.pObject;
-        if (pObject && pObject->m_pEntity && m_pPed->IsAdded() && m_pPed->m_pRwClump)
+
+        if (bIsAdded && hierarchy && needRender && pObject && pObject->m_pEntity)
         {
-            auto hierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
+            int iID = RpHAnimIDGetIndex(hierarchy, attach.dwBone);
+            if (iID == -1) continue;
 
-            int iID;
-            if (hierarchy)
-            {
-
-                iID = RpHAnimIDGetIndex(hierarchy, attach.dwBone);
-            }
-            else
-            {
-                continue;
-            }
-            if (iID == -1)
-            {
-                continue;
-            }
             pObject->m_pEntity->Remove();
 
-            if(!needRender)
-                continue;
+            RwMatrix& boneMatrix = hierarchy->pMatrixArray[iID];
+            CMatrix matrix;
+            memcpy(&matrix, &boneMatrix, sizeof(RwMatrix));
 
-            RwMatrix outMat;
-            memcpy(&outMat, &hierarchy->pMatrixArray[iID], sizeof(RwMatrix));
+            CVector offset = attach.vecOffset;
+            CVector rotation = attach.vecRotation;
+            CVector scale = attach.vecScale;
 
-            CVector vecOut;
-            ProjectMatrix(&vecOut, (CMatrix*)&outMat, &attach.vecOffset);
-
-            outMat.pos = vecOut;
-
-            CVector axis { 1.0f, 0.0f, 0.0f };
-            if (attach.vecRotation.x != 0.0f)
-            {
-                RwMatrixRotate(&outMat, &axis, attach.vecRotation.x);
-            }
-            axis.Set( 0.0f, 1.0f, 0.0f );
-            if (attach.vecRotation.y != 0.0f)
-            {
-                RwMatrixRotate(&outMat, &axis, attach.vecRotation.y);
-            }
-            axis.Set( 0.0f, 0.0f, 1.0f );
-            if (attach.vecRotation.z != 0.0f)
-            {
-                RwMatrixRotate(&outMat, &axis, attach.vecRotation.z);
-            }
-
-            RwMatrixScale(&outMat, &attach.vecScale);
+            ProjectMatrix(&matrix.m_pos, &matrix, &offset);
+            matrix.Rotate(CVector(rotation.x, rotation.y, rotation.z));
+            matrix.Scale(scale);
 
             constexpr float boundaryLimit = 10000.0f;
-            if (std::abs(outMat.pos.x) >= boundaryLimit ||
-                std::abs(outMat.pos.y) >= boundaryLimit ||
-                std::abs(outMat.pos.z) >= boundaryLimit)
+            if (std::abs(matrix.m_pos.x) >= boundaryLimit ||
+                std::abs(matrix.m_pos.y) >= boundaryLimit ||
+                std::abs(matrix.m_pos.z) >= boundaryLimit)
             {
                 continue;
             }
 
-            pObject->m_pEntity->SetMatrix((CMatrix&)outMat); // copy to CMatrix
-
+            pObject->m_pEntity->SetMatrix((CMatrix&)matrix);
             pObject->m_pEntity->UpdateRW();
             pObject->m_pEntity->UpdateRwFrame();
-
             pObject->m_pEntity->Add();
         }
-        else
+        else if (pObject && pObject->m_pEntity)
         {
             pObject->m_pEntity->SetPosn(0.0f, 0.0f, 0.0f);
         }
