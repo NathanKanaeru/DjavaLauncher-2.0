@@ -13,6 +13,7 @@ import com.nathan.djavarp.game.ui.AttachEdit;
 import com.nathan.djavarp.game.ui.ChatWindow;
 import com.nathan.djavarp.game.ui.CustomKeyboard;
 import com.nathan.djavarp.game.ui.LoadingScreen;
+import com.nathan.djavarp.game.ui.tab.TabManager;
 import androidx.activity.OnBackPressedCallback;
 import com.nathan.djavarp.game.ui.dialog.DialogManager;
 import com.nathan.djavarp.launcher.util.SignatureChecker;
@@ -31,6 +32,7 @@ public class SAMP extends GTASA implements CustomKeyboard.InputListener, HeightP
     private AttachEdit mAttachEdit;
     private LoadingScreen mLoadingScreen;
     private ChatWindow mChatWindow;
+    private TabManager mTabManager;
 
     //public native void sendDialogResponse(int i, int i2, int i3, byte[] str);
 
@@ -40,22 +42,45 @@ public class SAMP extends GTASA implements CustomKeyboard.InputListener, HeightP
 
     private void showTab()
     {
-
+        runOnUiThread(() -> {
+            if (mTabManager != null) mTabManager.show();
+        });
     }
 
     private void hideTab()
     {
-
+        runOnUiThread(() -> {
+            if (mTabManager != null) mTabManager.hide();
+        });
     }
 
     private void setTab(int id, String name, int score, int ping)
     {
-
+        int color;
+        // Standard SA-MP player color derivation
+        switch ((id * 3 + 7) % 10) {
+            case 0: color = 0xFFE2C063; break;
+            case 1: color = 0xFFC4C4C4; break;
+            case 2: color = 0xFF4A6C7A; break;
+            case 3: color = 0xFF94A2B3; break;
+            case 4: color = 0xFF889C8E; break;
+            case 5: color = 0xFFC8A8A8; break;
+            case 6: color = 0xFF6B8B9A; break;
+            case 7: color = 0xFF9CB48C; break;
+            case 8: color = 0xFFC8B48C; break;
+            default: color = 0xFFB48C9C; break;
+        }
+        final int c = color;
+        runOnUiThread(() -> {
+            if (mTabManager != null) mTabManager.setStat(id, c, name, score, ping);
+        });
     }
 
     private void clearTab()
     {
-
+        runOnUiThread(() -> {
+            if (mTabManager != null) mTabManager.clear();
+        });
     }
 
     private void showLoadingScreen()
@@ -197,6 +222,7 @@ public class SAMP extends GTASA implements CustomKeyboard.InputListener, HeightP
         mLoadingScreen = new LoadingScreen(this);
 
         mChatWindow = new ChatWindow(this);
+        mTabManager = new TabManager(this);
 
         instance = this;
 

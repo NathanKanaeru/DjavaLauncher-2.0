@@ -21,6 +21,14 @@
         <View android:id="@+id/dark_screen" android:background="#ff000000" android:visibility="visible" android:layout_width="fill_parent" android:layout_height="fill_parent" android:alpha="0.0" />
 
         <include layout="@layout/chat_window" />
+
+        <FrameLayout
+            android:id="@+id/tab_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+            <include layout="@layout/tabs_layout" />
+        </FrameLayout>
     </FrameLayout>
 
 </FrameLayout>

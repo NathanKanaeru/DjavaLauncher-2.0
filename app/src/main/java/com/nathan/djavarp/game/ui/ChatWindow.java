@@ -8,6 +8,7 @@ import android.text.Spanned;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -55,10 +56,23 @@ public class ChatWindow {
     ChatAdapter adapter;
     ArrayList<Spanned> chat_lines = new ArrayList<>();
 
+    private final android.app.Activity mActivity;
+
     public ChatWindow(android.app.Activity activity) {
+        mActivity = activity;
 
         chat_box = activity.findViewById(R.id.chat_box);
         if (chat_box == null) return;
+
+        FadingEdgeLayout chatFadeBox = activity.findViewById(R.id.chat_fade_box);
+        chatFadeBox.setOnClickListener(v -> toggleKeyboard(activity));
+        chatFadeBox.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                toggleKeyboard(activity);
+                return true;
+            }
+            return false;
+        });
 
         hide_chat = activity.findViewById(R.id.hide_chat);
         hide_chat.setOnClickListener(view -> {
@@ -122,11 +136,16 @@ public class ChatWindow {
         chat_input.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 try {
-                    SendChatMessage(chat_input.getText().toString().getBytes("windows-1251"));
+                    String prefix = "";
+                    if (chat_button == ME_BUTTON) prefix = "/me ";
+                    else if (chat_button == DO_BUTTON) prefix = "/do ";
+                    else if (chat_button == TRY_BUTTON) prefix = "/try ";
+                    String msg = prefix + chat_input.getText().toString();
+                    SendChatMessage(msg.getBytes("windows-1251"));
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                toggleKeyboard(activity, false);
+                toggleKeyboard(activity);
                 return true;
             }
             return false;
@@ -134,8 +153,6 @@ public class ChatWindow {
 
         defaultChatFontSize = 27;
         chat = activity.findViewById(R.id.chat);
-
-        FadingEdgeLayout chatBox = activity.findViewById(R.id.chat_fade_box);
 
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(activity);
         mLayoutManager.setStackFromEnd(true);
@@ -184,14 +201,14 @@ public class ChatWindow {
         });
     }
 
-    void toggleKeyboard(android.app.Activity activity, boolean toggle) {
-        ToggleChatInput(toggle, activity);
-        chat_input.requestFocus();
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (toggle)
+    void toggleKeyboard(android.app.Activity activity) {
+        boolean show = chat_input_layout.getVisibility() != View.VISIBLE;
+        ToggleChatInput(show, activity);
+        if (show) {
+            chat_input.requestFocus();
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.showSoftInput(chat_input, InputMethodManager.SHOW_IMPLICIT);
-        else
-            imm.hideSoftInputFromWindow(chat_input.getWindowToken(), 0);
+        }
     }
 
     public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {

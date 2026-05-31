@@ -4,10 +4,12 @@
 #include "../../net/netgame.h"
 #include "../../net/localplayer.h"
 #include "../../net/netgame.h"
+#include "../../java/jniutil.h"
 
 extern UI* pUI;
 extern CNetGame* pNetGame;
 extern CGame *pGame;
+extern CJavaWrapper* pJavaWrapper;
 
 
 
@@ -38,12 +40,12 @@ ButtonPanel::ButtonPanel()
 	m_bTab->setCallback([]() 
 	{ 
 		if (Tab == 0) {
-			if (pUI) { pUI->playertablist()->show(); Tab = 1; }
+			if (pJavaWrapper) { pJavaWrapper->ShowTab(); Tab = 1; }
 		}
 		else {
+			if (pJavaWrapper) { pJavaWrapper->HideTab(); }
 			Tab = 0;
 		}
-		//pNetGame->SendChatCommand("/tab"); 
 	});
 	m_bOpen->setCallback([]() { OpenButton = true; });
 	m_bClose->setCallback([]() { OpenButton = false; });

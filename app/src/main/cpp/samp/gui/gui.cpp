@@ -48,7 +48,6 @@ bool UI::initialize()
 	this->addChild(m_chat);
 	m_chat->setFixedSize(UISettings::chatSize());
 	m_chat->setPosition(UISettings::chatPos());
-	m_chat->setItemSize(UISettings::chatItemSize());
 	m_chat->setVisible(false);
 
 	m_buttonPanel = new ButtonPanel();

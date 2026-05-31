@@ -2,6 +2,7 @@
 #include "game.h"
 #include "../net/netgame.h"
 #include "../gui/gui.h"
+#include "../java/jniutil.h"
 #include "../vendor/shadowhook/patch.h"
 #include "World.h"
 #include "Timer.h"
@@ -9,6 +10,7 @@
 extern UI* pUI;
 extern CGame* pGame;
 extern CNetGame* pNetGame;
+extern CJavaWrapper* pJavaWrapper;
 
 extern uint8_t byteCurPlayer;
 extern uintptr_t dwCurPlayerActor;
@@ -515,8 +517,8 @@ uint32_t CPad__GetDisplayVitalStats_hook(uint32_t thiz)
 {
 	uint32_t result = CPad__GetDisplayVitalStats(thiz);
 
-	if (pUI) {
-		if (result) pUI->playertablist()->show();
+	if (pJavaWrapper) {
+		if (result) pJavaWrapper->ShowTab();
 	}
 
 	return 0;

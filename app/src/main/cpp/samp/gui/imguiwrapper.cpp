@@ -107,7 +107,7 @@ void ImGuiWrapper::render()
 	// voice
 	if (pNetGame) {
 
-		if (pUI->dialog()->visible() || pUI->playertablist()->visible() || pNetGame->GetTextDrawPool()->GetState()) {
+		if (pUI->dialog()->visible() || pNetGame->GetTextDrawPool()->GetState()) {
 			SpeakerList::Hide();
 			MicroIcon::Hide();
 		}

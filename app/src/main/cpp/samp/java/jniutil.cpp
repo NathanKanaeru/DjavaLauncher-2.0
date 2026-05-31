@@ -1,6 +1,11 @@
 #include "jniutil.h"
 #include "game/game.h"
+#include "../net/netgame.h"
+#include "../net/localplayer.h"
+#include "../net/remoteplayer.h"
+
 extern CGame *pGame;
+extern CNetGame* pNetGame;
 
 CJavaWrapper::CJavaWrapper(JNIEnv *env, jobject activity)
 {
@@ -106,6 +111,41 @@ void CJavaWrapper::ShowTab()
 {
     JNIEnv* p;
     javaVM->GetEnv((void**)&p, JNI_VERSION_1_6);
+
+    // Clear previous tab
+    p->CallVoidMethod(activity, s_clearTab);
+    EXCEPTION_CHECK(p);
+
+    // Populate with current player data
+    if (pNetGame)
+    {
+        pNetGame->UpdatePlayerScoresAndPings();
+        CPlayerPool* pPlayerPool = pNetGame->GetPlayerPool();
+        if (pPlayerPool)
+        {
+            // Local player
+            int localId = pPlayerPool->GetLocalPlayerID();
+            char* localName = pPlayerPool->GetLocalPlayerName();
+            int localScore = pPlayerPool->GetLocalPlayerScore();
+            int localPing = pPlayerPool->GetLocalPlayerPing();
+            SetTab(localId, localName, localScore, localPing);
+
+            // Remote players
+            for (int i = 0; i < MAX_PLAYERS; i++)
+            {
+                CRemotePlayer* pRemote = pPlayerPool->GetAt(i);
+                if (pRemote && !pPlayerPool->IsPlayerNPC(i))
+                {
+                    char* name = pPlayerPool->GetPlayerName(i);
+                    int score = pPlayerPool->GetPlayerScore(i);
+                    int ping = pPlayerPool->GetPlayerPing(i);
+                    SetTab(i, name, score, ping);
+                }
+            }
+        }
+    }
+
+    // Show the Java tab
     p->CallVoidMethod(activity, s_showTab);
     EXCEPTION_CHECK(p);
 }
