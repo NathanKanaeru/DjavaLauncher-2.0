@@ -7,7 +7,6 @@ import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -146,17 +145,12 @@ public class ChatWindow {
         defaultChatFontSize = 27;
         chat = activity.findViewById(R.id.chat);
 
-        FadingEdgeLayout chatFadeBox = activity.findViewById(R.id.chat_fade_box);
-        GestureDetector gd = new GestureDetector(activity, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
+        chat.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
                 toggleKeyboard(activity);
-                return true;
             }
+            return false;
         });
-        chatFadeBox.setOnTouchListener((v, event) -> gd.onTouchEvent(event));
-        chatFadeBox.setClickable(true);
-        chatFadeBox.setFocusable(true);
 
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(activity);
         mLayoutManager.setStackFromEnd(true);
@@ -207,11 +201,14 @@ public class ChatWindow {
 
     void toggleKeyboard(android.app.Activity activity) {
         boolean show = chat_input_layout.getVisibility() != View.VISIBLE;
-        ToggleChatInput(show, activity);
         if (show) {
+            chat_input_layout.setVisibility(View.VISIBLE);
             chat_input.requestFocus();
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.showSoftInput(chat_input, InputMethodManager.SHOW_IMPLICIT);
+        } else {
+            chat_input_layout.setVisibility(View.GONE);
+            chat_input.getText().clear();
         }
     }
 
@@ -229,6 +226,7 @@ public class ChatWindow {
         @Override
         public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
             View view = inflater.inflate(R.layout.chat_message_item, parent, false);
+            view.setOnClickListener(v -> toggleKeyboard(mActivity));
             return new ViewHolder(view);
         }
 

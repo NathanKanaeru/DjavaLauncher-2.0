@@ -5,6 +5,7 @@ import android.content.Context;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -60,19 +61,23 @@ public class DialogManager {
         this.mMainLayout = activity.findViewById(R.id.sd_dialog_main);
 
         if (mMainLayout == null) {
-            Log.e(TAG, "sd_dialog_main not found in layout!");
-            return;
+            Log.e(TAG, "sd_dialog_main not found in layout, inflating dynamically");
+            View dialogView = activity.getLayoutInflater().inflate(R.layout.sd_dialog, null);
+            this.mMainLayout = (ConstraintLayout) dialogView;
+            activity.addContentView(dialogView, new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
         }
 
-        this.mCaption = activity.findViewById(R.id.sd_dialog_caption);
-        this.mContent = activity.findViewById(R.id.sd_dialog_text);
-        this.mMsgBoxLayout = activity.findViewById(R.id.sd_dialog_text_layout);
-        this.mInputLayout = activity.findViewById(R.id.sd_dialog_input_layout);
-        this.mInput = activity.findViewById(R.id.sd_dialog_input);
-        this.mListLayout = activity.findViewById(R.id.sd_dialog_list_layout);
-        this.mRecycler = activity.findViewById(R.id.sd_dialog_list_recycler);
-        this.mLeftBtn = activity.findViewById(R.id.sd_button_positive);
-        this.mRightBtn = activity.findViewById(R.id.sd_button_negative);
+        this.mCaption = mMainLayout.findViewById(R.id.sd_dialog_caption);
+        this.mContent = mMainLayout.findViewById(R.id.sd_dialog_text);
+        this.mMsgBoxLayout = mMainLayout.findViewById(R.id.sd_dialog_text_layout);
+        this.mInputLayout = mMainLayout.findViewById(R.id.sd_dialog_input_layout);
+        this.mInput = mMainLayout.findViewById(R.id.sd_dialog_input);
+        this.mListLayout = mMainLayout.findViewById(R.id.sd_dialog_list_layout);
+        this.mRecycler = mMainLayout.findViewById(R.id.sd_dialog_list_recycler);
+        this.mLeftBtn = mMainLayout.findViewById(R.id.sd_button_positive);
+        this.mRightBtn = mMainLayout.findViewById(R.id.sd_button_negative);
 
         if (mCaption == null) Log.e(TAG, "sd_dialog_caption not found");
         if (mContent == null) Log.e(TAG, "sd_dialog_text not found");
@@ -89,7 +94,7 @@ public class DialogManager {
             mRightBtn.setOnClickListener(v -> sendDialogResponse(0));
         }
 
-        ConstraintLayout headersLayout = activity.findViewById(R.id.sd_dialog_tablist_row);
+        ConstraintLayout headersLayout = mMainLayout.findViewById(R.id.sd_dialog_tablist_row);
         if (headersLayout != null) {
             for (int i = 0; i < headersLayout.getChildCount(); i++) {
                 View child = headersLayout.getChildAt(i);
@@ -100,7 +105,13 @@ public class DialogManager {
         }
 
         this.mRowsList = new ArrayList<>();
-        mInput.setShowSoftInputOnFocus(false);
+        if (mInput != null && mInputLayout != null) {
+            mInputLayout.setOnClickListener(v -> {
+                mInput.requestFocus();
+                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(mInput, InputMethodManager.SHOW_IMPLICIT);
+            });
+        }
         Util.HideLayout(this.mMainLayout, false);
         isShow = false;
         Log.d(TAG, "DialogManager initialized successfully");
@@ -124,6 +135,11 @@ public class DialogManager {
                         mInput.setInputType(InputType.TYPE_CLASS_TEXT);
                     } else if (dialogTypeId == DIALOG_STYLE_PASSWORD) {
                         mInput.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    }
+                    if (dialogTypeId == DIALOG_STYLE_INPUT || dialogTypeId == DIALOG_STYLE_PASSWORD) {
+                        mInput.requestFocus();
+                        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(mInput, InputMethodManager.SHOW_IMPLICIT);
                     }
                 }
 

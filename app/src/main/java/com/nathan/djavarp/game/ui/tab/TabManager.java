@@ -28,7 +28,12 @@ public class TabManager {
 
         totalPlayers = rootView.findViewById(R.id.tab_total_players);
 
-        rootView.setOnClickListener(v -> {});
+        rootView.setOnClickListener(v -> hide());
+
+        View closeBtn = rootView.findViewById(R.id.tab_close);
+        if (closeBtn != null) {
+            closeBtn.setOnClickListener(v -> hide());
+        }
     }
 
     public void show() {
