@@ -5,7 +5,9 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -63,16 +65,6 @@ public class ChatWindow {
 
         chat_box = activity.findViewById(R.id.chat_box);
         if (chat_box == null) return;
-
-        FadingEdgeLayout chatFadeBox = activity.findViewById(R.id.chat_fade_box);
-        chatFadeBox.setOnClickListener(v -> toggleKeyboard(activity));
-        chatFadeBox.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                toggleKeyboard(activity);
-                return true;
-            }
-            return false;
-        });
 
         hide_chat = activity.findViewById(R.id.hide_chat);
         hide_chat.setOnClickListener(view -> {
@@ -153,6 +145,18 @@ public class ChatWindow {
 
         defaultChatFontSize = 27;
         chat = activity.findViewById(R.id.chat);
+
+        FadingEdgeLayout chatFadeBox = activity.findViewById(R.id.chat_fade_box);
+        GestureDetector gd = new GestureDetector(activity, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                toggleKeyboard(activity);
+                return true;
+            }
+        });
+        chatFadeBox.setOnTouchListener((v, event) -> gd.onTouchEvent(event));
+        chatFadeBox.setClickable(true);
+        chatFadeBox.setFocusable(true);
 
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(activity);
         mLayoutManager.setStackFromEnd(true);

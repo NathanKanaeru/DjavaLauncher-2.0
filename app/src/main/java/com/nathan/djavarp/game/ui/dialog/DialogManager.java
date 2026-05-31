@@ -3,6 +3,7 @@ package com.nathan.djavarp.game.ui.dialog;
 import android.app.Activity;
 import android.content.Context;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -20,6 +21,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class DialogManager {
+
+    private static final String TAG = "DialogManager";
 
     static final int DIALOG_STYLE_MSGBOX         = 0;
     static final int DIALOG_STYLE_INPUT          = 1;
@@ -56,7 +59,10 @@ public class DialogManager {
         this.activity = activity;
         this.mMainLayout = activity.findViewById(R.id.sd_dialog_main);
 
-        if (mMainLayout == null) return;
+        if (mMainLayout == null) {
+            Log.e(TAG, "sd_dialog_main not found in layout!");
+            return;
+        }
 
         this.mCaption = activity.findViewById(R.id.sd_dialog_caption);
         this.mContent = activity.findViewById(R.id.sd_dialog_text);
@@ -68,106 +74,159 @@ public class DialogManager {
         this.mLeftBtn = activity.findViewById(R.id.sd_button_positive);
         this.mRightBtn = activity.findViewById(R.id.sd_button_negative);
 
-        ConstraintLayout headersLayout = activity.findViewById(R.id.sd_dialog_tablist_row);
-        for (int i = 0; i < headersLayout.getChildCount(); i++) {
-            this.mHeadersList.add((TextView) headersLayout.getChildAt(i));
+        if (mCaption == null) Log.e(TAG, "sd_dialog_caption not found");
+        if (mContent == null) Log.e(TAG, "sd_dialog_text not found");
+        if (mMsgBoxLayout == null) Log.e(TAG, "sd_dialog_text_layout not found");
+        if (mInput == null) Log.e(TAG, "sd_dialog_input not found");
+        if (mRecycler == null) Log.e(TAG, "sd_dialog_list_recycler not found");
+        if (mLeftBtn == null) Log.e(TAG, "sd_button_positive not found");
+        if (mRightBtn == null) Log.e(TAG, "sd_button_negative not found");
+
+        if (mLeftBtn != null) {
+            mLeftBtn.setOnClickListener(v -> sendDialogResponse(1));
+        }
+        if (mRightBtn != null) {
+            mRightBtn.setOnClickListener(v -> sendDialogResponse(0));
         }
 
-        mLeftBtn.setOnClickListener(v -> sendDialogResponse(1));
-        mRightBtn.setOnClickListener(v -> sendDialogResponse(0));
+        ConstraintLayout headersLayout = activity.findViewById(R.id.sd_dialog_tablist_row);
+        if (headersLayout != null) {
+            for (int i = 0; i < headersLayout.getChildCount(); i++) {
+                View child = headersLayout.getChildAt(i);
+                if (child instanceof TextView) {
+                    this.mHeadersList.add((TextView) child);
+                }
+            }
+        }
 
         this.mRowsList = new ArrayList<>();
-
+        mInput.setShowSoftInputOnFocus(false);
         Util.HideLayout(this.mMainLayout, false);
         isShow = false;
+        Log.d(TAG, "DialogManager initialized successfully");
     }
 
     public void show(int dialogId, int dialogTypeId, String caption, String content, String leftBtnText, String rightBtnText) {
-        switch (dialogTypeId) {
-            case DIALOG_STYLE_INPUT:
-                mInput.setInputType(InputType.TYPE_CLASS_TEXT);
-                break;
-            case DIALOG_STYLE_PASSWORD:
-                mInput.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                break;
-            case DIALOG_STYLE_TABLIST_HEADERS:
-            case DIALOG_STYLE_TABLIST:
-                break;
-        }
-
         activity.runOnUiThread(() -> {
-            clearDialogData();
+            try {
+                if (mMainLayout == null) {
+                    Log.e(TAG, "show() called but mMainLayout is null");
+                    return;
+                }
 
-            this.mCurrentDialogId = dialogId;
-            this.mCurrentDialogTypeId = dialogTypeId;
+                clearDialogData();
 
-            if (dialogTypeId == DIALOG_STYLE_MSGBOX) {
-                mInputLayout.setVisibility(View.GONE);
-                mListLayout.setVisibility(View.GONE);
-                mMsgBoxLayout.setVisibility(View.VISIBLE);
-            } else if (dialogTypeId == DIALOG_STYLE_INPUT || dialogTypeId == DIALOG_STYLE_PASSWORD) {
-                mInputLayout.setVisibility(View.VISIBLE);
-                mMsgBoxLayout.setVisibility(View.VISIBLE);
-                mListLayout.setVisibility(View.GONE);
-            } else {
-                mInputLayout.setVisibility(View.GONE);
-                mMsgBoxLayout.setVisibility(View.GONE);
-                mListLayout.setVisibility(View.VISIBLE);
-                loadTabList(content);
+                this.mCurrentDialogId = dialogId;
+                this.mCurrentDialogTypeId = dialogTypeId;
 
-                DialogAdapter adapter = new DialogAdapter(this.mRowsList, this.mHeadersList);
-                adapter.setOnClickListener((i, str) -> {
-                    this.mCurrentListItem = i;
-                    this.mCurrentInputText = str;
-                });
-                adapter.setOnDoubleClickListener(() -> sendDialogResponse(1));
-                mRecycler.setLayoutManager(new LinearLayoutManager(activity));
-                mRecycler.setAdapter(adapter);
-
-                mMainLayout.post(() -> {
-                    int width = mCaption.getWidth();
-                    if (mRecycler.getMinimumWidth() < width) {
-                        mRecycler.setMinimumWidth(width);
+                if (mInput != null) {
+                    if (dialogTypeId == DIALOG_STYLE_INPUT) {
+                        mInput.setInputType(InputType.TYPE_CLASS_TEXT);
+                    } else if (dialogTypeId == DIALOG_STYLE_PASSWORD) {
+                        mInput.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     }
-                    if (dialogTypeId != DIALOG_STYLE_LIST) {
-                        adapter.updateSizes();
+                }
+
+                if (dialogTypeId == DIALOG_STYLE_MSGBOX) {
+                    if (mInputLayout != null) mInputLayout.setVisibility(View.GONE);
+                    if (mListLayout != null) mListLayout.setVisibility(View.GONE);
+                    if (mMsgBoxLayout != null) mMsgBoxLayout.setVisibility(View.VISIBLE);
+                } else if (dialogTypeId == DIALOG_STYLE_INPUT || dialogTypeId == DIALOG_STYLE_PASSWORD) {
+                    if (mInputLayout != null) mInputLayout.setVisibility(View.VISIBLE);
+                    if (mMsgBoxLayout != null) mMsgBoxLayout.setVisibility(View.VISIBLE);
+                    if (mListLayout != null) mListLayout.setVisibility(View.GONE);
+                } else {
+                    if (mInputLayout != null) mInputLayout.setVisibility(View.GONE);
+                    if (mMsgBoxLayout != null) mMsgBoxLayout.setVisibility(View.GONE);
+                    if (mListLayout != null) mListLayout.setVisibility(View.VISIBLE);
+
+                    loadTabList(content);
+
+                    DialogAdapter adapter = new DialogAdapter(this.mRowsList, this.mHeadersList);
+                    adapter.setOnClickListener((i, str) -> {
+                        this.mCurrentListItem = i;
+                        this.mCurrentInputText = str;
+                    });
+                    adapter.setOnDoubleClickListener(() -> sendDialogResponse(1));
+                    if (mRecycler != null) {
+                        mRecycler.setLayoutManager(new LinearLayoutManager(activity));
+                        mRecycler.setAdapter(adapter);
+                        mMainLayout.post(() -> {
+                            if (mCaption != null && mRecycler != null) {
+                                int w = mCaption.getWidth();
+                                if (mRecycler.getMinimumWidth() < w) {
+                                    mRecycler.setMinimumWidth(w);
+                                }
+                            }
+                            if (dialogTypeId != DIALOG_STYLE_LIST) {
+                                adapter.updateSizes();
+                            }
+                            mRecycler.requestLayout();
+                        });
                     }
-                    mRecycler.requestLayout();
-                });
+                }
+
+                if (mCaption != null) mCaption.setText(Util.getColoredString(caption));
+                if (mContent != null) mContent.setText(Util.getColoredString(content));
+
+                if (mLeftBtn != null && mLeftBtn.getChildCount() > 0) {
+                    View child = mLeftBtn.getChildAt(0);
+                    if (child instanceof TextView) {
+                        ((TextView) child).setText(Util.getColoredString(leftBtnText));
+                    }
+                }
+                if (mRightBtn != null && mRightBtn.getChildCount() > 0) {
+                    View child = mRightBtn.getChildAt(0);
+                    if (child instanceof TextView) {
+                        ((TextView) child).setText(Util.getColoredString(rightBtnText));
+                    }
+                }
+
+                if (mRightBtn != null) {
+                    if (rightBtnText == null || rightBtnText.isEmpty()) {
+                        mRightBtn.setVisibility(View.GONE);
+                    } else {
+                        mRightBtn.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                Util.ShowLayout(this.mMainLayout, false);
+                isShow = true;
+                Log.d(TAG, "Dialog shown: id=" + dialogId + " style=" + dialogTypeId);
+            } catch (Exception e) {
+                Log.e(TAG, "Error showing dialog", e);
             }
-
-            mCaption.setText(Util.getColoredString(caption));
-            mContent.setText(Util.getColoredString(content));
-            ((TextView) mLeftBtn.getChildAt(0)).setText(Util.getColoredString(leftBtnText));
-            ((TextView) mRightBtn.getChildAt(0)).setText(Util.getColoredString(rightBtnText));
-
-            if (rightBtnText == null || rightBtnText.isEmpty()) {
-                mRightBtn.setVisibility(View.GONE);
-            } else {
-                mRightBtn.setVisibility(View.VISIBLE);
-            }
-
-            Util.ShowLayout(this.mMainLayout, false);
-            isShow = true;
         });
     }
 
     public void hide() {
         activity.runOnUiThread(() -> {
-            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
-            Util.HideLayout(this.mMainLayout, false);
-            isShow = false;
+            try {
+                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (mInput != null) {
+                    imm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
+                }
+                if (mMainLayout != null) {
+                    Util.HideLayout(this.mMainLayout, false);
+                }
+                isShow = false;
+            } catch (Exception e) {
+                Log.e(TAG, "Error hiding dialog", e);
+            }
         });
     }
 
     public void hideWithoutReset() {
-        Util.HideLayout(this.mMainLayout, false);
+        if (mMainLayout != null) {
+            Util.HideLayout(this.mMainLayout, false);
+        }
         isShow = false;
     }
 
     public void showWithOldContent() {
-        Util.ShowLayout(this.mMainLayout, false);
+        if (mMainLayout != null) {
+            Util.ShowLayout(this.mMainLayout, false);
+        }
         isShow = true;
     }
 
@@ -183,13 +242,14 @@ public class DialogManager {
             byte[] bytes = inputText.getBytes("windows-1251");
             sendDialogResponse(btnId, this.mCurrentDialogId, listItem, bytes);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Encoding error", e);
         } finally {
             hide();
         }
     }
 
     private void loadTabList(String content) {
+        if (content == null) return;
         String[] lines = content.split("\n");
         for (int i = 0; i < lines.length; i++) {
             if (this.mCurrentDialogTypeId == DIALOG_STYLE_TABLIST_HEADERS && i == 0) {
@@ -205,34 +265,48 @@ public class DialogManager {
     }
 
     private void clearDialogData() {
-        mRecycler.setMinimumWidth(300);
-        mInput.setText("");
+        if (mRecycler != null) {
+            mRecycler.setMinimumWidth(300);
+            mRecycler.setAdapter(null);
+        }
+        if (mInput != null) {
+            mInput.setText("");
+        }
         mCurrentDialogId = -1;
         mCurrentDialogTypeId = -1;
         mCurrentListItem = -1;
-        mRowsList.clear();
-        mRecycler.setAdapter(null);
+        if (mRowsList != null) {
+            mRowsList.clear();
+        }
         for (TextView h : mHeadersList) {
-            h.setText("");
-            h.setVisibility(View.GONE);
+            if (h != null) {
+                h.setText("");
+                h.setVisibility(View.GONE);
+            }
         }
     }
 
     private void sendDialogResponse(int btnId) {
-        if (mCurrentDialogTypeId == DIALOG_STYLE_INPUT || mCurrentDialogTypeId == DIALOG_STYLE_PASSWORD) {
-            this.mCurrentInputText = this.mInput.getText().toString();
-        } else if (mCurrentDialogTypeId == DIALOG_STYLE_MSGBOX) {
-            this.mCurrentInputText = "";
-        }
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
-
         try {
+            if (mCurrentDialogTypeId == DIALOG_STYLE_INPUT || mCurrentDialogTypeId == DIALOG_STYLE_PASSWORD) {
+                this.mCurrentInputText = mInput != null ? mInput.getText().toString() : "";
+            } else if (mCurrentDialogTypeId == DIALOG_STYLE_MSGBOX) {
+                this.mCurrentInputText = "";
+            }
+
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (mInput != null) {
+                imm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
+            }
+
             sendDialogResponse(btnId, mCurrentDialogId, mCurrentListItem, mCurrentInputText.getBytes("windows-1251"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e(TAG, "Error in sendDialogResponse", e);
         }
-        Util.HideLayout(mMainLayout, false);
+
+        if (mMainLayout != null) {
+            Util.HideLayout(mMainLayout, false);
+        }
         isShow = false;
     }
 }
