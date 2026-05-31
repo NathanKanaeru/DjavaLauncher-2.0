@@ -29,6 +29,8 @@
             android:visibility="gone">
             <include layout="@layout/tabs_layout" />
         </FrameLayout>
+
+        <include layout="@layout/sd_dialog" />
     </FrameLayout>
 
 </FrameLayout>
